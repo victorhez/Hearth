@@ -4,12 +4,14 @@
 //   upstash             set LEGACYLINK_UPSTASH_URL + _TOKEN; free tier, no credit card, works on any host
 import fs from "node:fs";
 import path from "node:path";
+import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 export const DATA_DIR = process.env.LEGACYLINK_DATA_DIR || path.join(here, "..", "data");
 const DIR = DATA_DIR;
 const safe = (h) => String(h || "home").replace(/[^a-z0-9_-]/gi, "").slice(0, 40) || "home";
+export const upstashConfigured = () => Boolean(process.env.LEGACYLINK_UPSTASH_URL && process.env.LEGACYLINK_UPSTASH_TOKEN);
 
 const fileStore = (household) => {
   const f = path.join(DIR, `${safe(household)}.json`);
@@ -59,6 +61,15 @@ const redis = async (...cmd) => {
   if (j.error) throw new Error("upstash: " + j.error);
   return j.result;
 };
+const conversationKey = (id) => `ll:session:${crypto.createHash("sha256").update(String(id)).digest("hex")}`;
+export async function getConversation(id) {
+  const value = await redis("GET", conversationKey(id));
+  return value ? JSON.parse(value) : null;
+}
+export async function setConversation(id, state) {
+  await redis("SET", conversationKey(id), JSON.stringify(state), "EX", 86400);
+}
+
 const upstashStore = (household) => {
   const key = `ll:${safe(household)}`;
   return {
@@ -78,4 +89,4 @@ const upstashStore = (household) => {
   };
 };
 
-export const forHousehold = (household) => (process.env.LEGACYLINK_DDB_TABLE ? ddbStore(household) : process.env.LEGACYLINK_UPSTASH_URL ? upstashStore(household) : fileStore(household));
+export const forHousehold = (household) => (process.env.LEGACYLINK_DDB_TABLE ? ddbStore(household) : upstashConfigured() ? upstashStore(household) : fileStore(household));

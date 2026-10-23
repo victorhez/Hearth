@@ -11,7 +11,7 @@ import { buildServer } from "./tools.mjs";
 import { handle } from "./brain.mjs";
 import * as N from "./nlp.mjs";
 import * as AI from "./llm.mjs";
-import { forHousehold } from "./store.mjs";
+import { forHousehold, upstashConfigured } from "./store.mjs";
 import { seedHousehold } from "./seed.mjs";
 import { synthesize } from "./tts.mjs";
 import { S, UI, LANGS, CODES } from "./i18n.mjs";
@@ -23,9 +23,17 @@ const TOKEN = process.env.LEGACYLINK_TOKEN || "";
 const hh = (req) => { const h = req.hh || String(req.get("x-household") || req.query.household || "home"); return h.startsWith("_") ? "home" : h; }; // "_" names are reserved for accounts data
 const bearer = (req) => (req.get("authorization") || "").replace(/^Bearer /, "") || String(req.query.token || "");
 
-export function createApp() {
-  const app = express();
+export function createApp(app = express()) {
   app.use(express.json({ limit: "1mb" }));
+  app.use((_req, res, next) => {
+    if (!process.env.VERCEL) return next();
+    const missing = [];
+    if (!upstashConfigured()) missing.push("configure Upstash REST URL and token");
+    if (!accountsOn()) missing.push("set LEGACYLINK_ACCOUNTS=1");
+    if (!process.env.LEGACYLINK_SECRET) missing.push("set LEGACYLINK_SECRET");
+    if (missing.length) return res.status(503).json({ error: "Vercel deployment is not configured", missing });
+    next();
+  });
 
   // accounts mode: the household comes from a signed token (never from a client header).
   // shared-token mode (default): optional LEGACYLINK_TOKEN + x-household header, handy for local use.
@@ -40,7 +48,7 @@ export function createApp() {
   };
   mountAuth(app, express);
 
-  app.get("/health", (_q, r) => r.json({ ok: true, llm: AI.enabled() ? "bedrock" : "local", store: process.env.LEGACYLINK_DDB_TABLE ? "dynamodb" : process.env.LEGACYLINK_UPSTASH_URL ? "upstash" : "file", accounts: accountsOn() }));
+  app.get("/health", (_q, r) => r.json({ ok: true, llm: AI.enabled() ? "bedrock" : "local", store: process.env.LEGACYLINK_DDB_TABLE ? "dynamodb" : upstashConfigured() ? "upstash" : "file", accounts: accountsOn() }));
 
   app.post("/mcp", auth, async (req, res) => {
     const server = buildServer(hh(req));
@@ -70,6 +78,7 @@ export function createApp() {
   const subs = new Map();
   const publish = (h, ev) => (subs.get(h) || []).forEach((r) => r.write(`data: ${JSON.stringify(ev)}\n\n`));
   app.get("/api/device/events", auth, (req, res) => {
+    if (process.env.VERCEL) return res.status(204).end();
     res.set({ "content-type": "text/event-stream", "cache-control": "no-cache", connection: "keep-alive" }); res.flushHeaders();
     const h = hh(req); subs.set(h, [...(subs.get(h) || []), res]);
     req.on("close", () => subs.set(h, (subs.get(h) || []).filter((r) => r !== res)));

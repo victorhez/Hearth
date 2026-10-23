@@ -20,7 +20,7 @@ Use this as a source of accurate, copy-ready answers for the Devpost form. Repla
 >
 > The local prototype combines a browser voice experience, a Node.js conversation service, and an MCP server with ten oral-history tools. It supports seven languages and includes a Python runtime intended for a standalone Raspberry Pi device. The core web and conversation flows work locally. I have not yet packaged a finished appliance or published a live deployment.
 >
-> The current automated JavaScript run passed **9 of 9 tests**. The Python device suite ran **7 tests: 5 passed, 1 failed, and 1 was skipped** in my latest Windows run; the simulation test did not receive its expected reply, so I am treating device validation as incomplete. The local prototype has been exercised, but the physical Raspberry Pi audio/peripheral path is not yet certified.
+> The current automated JavaScript run passed **11 of 11 tests**. The Python device suite ran **7 tests: 5 passed, 1 failed, and 1 was skipped** in my latest Windows run; the simulation test did not receive its expected reply, so I am treating device validation as incomplete. The local prototype has been exercised, but the physical Raspberry Pi audio/peripheral path is not yet certified.
 >
 > I also implemented optional integration paths for Amazon Bedrock, Polly, and DynamoDB. I have not validated those services against a live AWS account. My AWS account setup is blocked because the phone-verification code has not arrived despite repeated attempts. I have contacted AWS Support and am waiting for help. The app's local mode does not require AWS.
 >

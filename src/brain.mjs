@@ -7,18 +7,20 @@ import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/
 import * as AI from "./llm.mjs";
 import { S, INTENT, LANGS, LANG_NAMES, SWITCH_RE, CODES } from "./i18n.mjs";
 import { parseNames } from "./i18n2.mjs";
+import { getConversation, setConversation } from "./store.mjs";
 
 const sessions = new Map();
-export const session = (id, teller, lang) => {
-  if (!sessions.has(id)) sessions.set(id, { teller, lang: lang || "en", history: [] });
-  const s = sessions.get(id);
+export const session = async (id, teller, lang) => {
+  let s = process.env.VERCEL ? await getConversation(id) : sessions.get(id);
+  if (s) sessions.set(id, s);
+  if (!s) sessions.set(id, s = { teller, lang: lang || "en", history: [] });
   if (teller) s.teller = teller;
   if (lang && CODES.includes(lang)) s.lang = lang;
   return s;
 };
 
-export async function mcp(household, token) {
-  const base = process.env.LEGACYLINK_MCP_URL || `http://127.0.0.1:${process.env.PORT || 3333}/mcp`;
+export async function mcp(household, token, url) {
+  const base = url || process.env.LEGACYLINK_MCP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}/mcp` : `http://127.0.0.1:${process.env.PORT || 3333}/mcp`);
   const client = new Client({ name: "hearth", version: "2.0.0" });
   const headers = { "x-household": household, ...(token ? { authorization: `Bearer ${token}` } : {}) };
   await client.connect(new StreamableHTTPClientTransport(new URL(base), { requestInit: { headers } }));
@@ -27,9 +29,9 @@ export async function mcp(household, token) {
 
 const parse = (r) => { const t = r.content?.[0]?.text ?? "{}"; try { return JSON.parse(t); } catch { return { text: t }; } };
 
-export async function handle({ sid, utterance, teller, lang, speaker, household, token, client: injected }) {
-  const st = session(sid, teller, lang), calls = [];
-  const client = injected || (await mcp(household, token));
+export async function handle({ sid, utterance, teller, lang, speaker, household, token, mcpUrl, client: injected }) {
+  const st = await session(sid, teller, lang), calls = [];
+  const client = injected || (await mcp(household, token, mcpUrl));
   const call = async (name, args) => { const result = parse(await client.callTool({ name, arguments: args })); calls.push({ tool: name, args, result }); return result; };
   try {
     const sp = speakerFlow(st, utterance, speaker);
@@ -37,7 +39,10 @@ export async function handle({ sid, utterance, teller, lang, speaker, household,
     const out = AI.enabled() && !st.family ? await agent(st, utterance, client, calls) : null;
     if (out) return { ...out, lang: st.lang, teller: st.teller, calls, engine: "bedrock-agent" };
     return { ...(await rules(st, utterance, call)), lang: st.lang, teller: st.teller, calls, engine: "local" };
-  } finally { if (!injected) await client.close().catch(() => {}); }
+  } finally {
+    if (!injected) await client.close().catch(() => {});
+    if (process.env.VERCEL) await setConversation(sid, st);
+  }
 }
 
 // ---------- Bedrock tool-use agent ----------

@@ -1,10 +1,36 @@
-# Putting Hearth online for free
+# Deploying Hearth
 
-This is the planned path for publishing the first web demo. **No public deployment is configured in this checkout yet.** The repository includes a Render blueprint; configure and test it before adding a public URL to Devpost. AWS is optional for this deployment.
+Vercel support is configured in this repository. The app exports its Express application through `src/index.mjs`; Vercel serves files in `public/` from its CDN and runs Express as a function. **This configuration is not a deployment:** import the GitHub repository and set the environment variables below before sharing a live URL. AWS is optional.
 
-Vercel configuration is not included. The current app is an Express server with a server-sent-events endpoint for live device state, so Render is the supported first target in this guide. A Vercel deployment would need a serverless adapter and explicit validation of streaming, static assets, and persistent storage.
+## Vercel (recommended for a public demo)
 
-## Recommended: Render (free web service) + Upstash (free Redis)
+1. In Vercel, create a project and import `victorhez/Hearth` from GitHub. Keep the detected Express framework and the repository root as the project root.
+2. Create a Redis database in Upstash (or connect the Vercel Upstash integration). In **Project Settings → Environment Variables**, add the database's REST URL and token as `LEGACYLINK_UPSTASH_URL` and `LEGACYLINK_UPSTASH_TOKEN` for **Production**, and for **Preview** if you want preview deployments to work.
+3. Add these variables to the same environments:
+
+   | Variable | Value |
+   |---|---|
+   | `LEGACYLINK_ACCOUNTS` | `1` |
+   | `LEGACYLINK_SECRET` | A unique random secret, at least 32 random bytes; keep it only in Vercel's environment settings. |
+   | `LEGACYLINK_TTS` | `edge` |
+   | `NODE_ENV` | `production` |
+
+   Generate a secret locally with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` and paste the output directly into Vercel. Do not commit it or put it in a public issue.
+
+4. Deploy. The deployment's own `VERCEL_URL` is used for Hearth's internal MCP requests; you do not need a hard-coded hostname. Check `https://<your-deployment>/health` and confirm it reports `"store":"upstash"` and `"accounts":true`.
+5. Open the HTTPS homepage in Chrome or Edge, choose **Try the demo family**, and verify that telling a story and then asking about it works. Use this URL in the Devpost testing link only after completing that smoke test.
+
+### Vercel behavior and limits
+
+- Upstash is required. Vercel function filesystems are temporary, and separate function instances do not share memory. Hearth stores family data in Redis and persists each conversation turn there for 24 hours. Without the required environment variables, the app returns a configuration error instead of silently using temporary storage.
+- The live device-screen event mirror (`/api/device/events`) is not available on Vercel because its current subscriber fan-out is process-local. The regular web app, MCP requests, and device `/api/say` calls remain available; use a persistent Node host such as Render for live screen mirroring.
+- AWS credentials and services are not required. Add the Bedrock/Polly/DynamoDB variables only after you have configured and tested those services.
+- Vercel's free plan and usage limits can change. Review the current plan limits and usage dashboard before sharing the deployment.
+- `vercel.json` sets the function maximum duration to 60 seconds. The effective limit is subject to the Vercel plan.
+
+To test with the Vercel development runtime, install/use the Vercel CLI, pull the project's environment variables, and run `vercel dev` from the repository root.
+
+## Alternative: Render (free web service) + Upstash (free Redis)
 
 1. Push this repo to GitHub (public, MIT license included).
 2. **Upstash:** create a free account at upstash.com → *Create database* (Redis, any region) → copy the **REST URL** and **REST token**.

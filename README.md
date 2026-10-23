@@ -39,7 +39,7 @@ The latest verification in this workspace:
 
 | Check | Result | Notes |
 |---|---:|---|
-| `npm test` | **9 passed, 0 failed** | Covers accounts and household isolation, MCP conversation flow, seven-language scenarios, mocked Bedrock tool selection, and Upstash behavior against a fake API. |
+| `npm test` | **11 passed, 0 failed** | Covers accounts and household isolation, MCP conversation flow, seven-language scenarios, mocked Bedrock tool selection, Upstash storage, Vercel entrypoint/configuration, and persistent conversation state. |
 | `python -m unittest device/test_device.py` | **5 passed, 1 failed, 1 skipped** | The `test_simulate_script` assertion did not receive its expected archive reply in this Windows run. The full device suite is therefore not green yet. |
 
 These results are automated local tests, not evidence of a live cloud deployment or physical-device certification. The automated suite does not verify a real browser microphone session or Raspberry Pi peripherals. The built-in speaker-recognition test data uses generated voices; its results should not be read as proof of reliable identification between real family members.
@@ -57,7 +57,7 @@ The application works locally without AWS credentials. Free hosting with Render 
 | Phase | Focus | Work |
 |---|---|---|
 | **Now — local prototype** | Core experience | Conversation, archive, quizzes, seven-language flows, accounts, MCP tools, and local testing. Continue fixing the device simulation test and keep results documented. |
-| **Next — public demo** | Shareable web experience | Publish the MIT-licensed repository, deploy the web app using the included Render blueprint and persistent Upstash storage, then test the HTTPS demo and judge instructions from a clean browser. Add the published video URL and live test link to the submission. |
+| **Next — public demo** | Shareable web experience | The repo is published and Vercel configuration is included. Connect the GitHub project, configure persistent Upstash storage and production secrets, deploy, then smoke-test the HTTPS demo from a clean browser before sharing a live test link. |
 | **Next — AWS validation** | Optional cloud integrations | After account verification, exercise Bedrock, Polly, and/or DynamoDB with least-privilege credentials, cost controls, and documented results. Only then claim live AWS service use or enter the AWS Builder Mini Challenge. |
 | **After the demo — device build** | Hardware readiness | Install on the target Raspberry Pi, validate microphone, speech recognition, speaker, wake phrase, LED feedback, reconnect/offline sync, and startup behavior; then create repeatable packaging and setup instructions. |
 | **Longer term — trust and reach** | Responsible expansion | Add encryption at rest, account verification and recovery, privacy controls for consent/export/deletion, real-family usability testing, and a supported Alexa+ integration/test path. |
@@ -103,9 +103,9 @@ Read the source guide in [docs/](docs/), including [AWS setup](docs/AWS_SETUP.md
 
 ## Deployment status
 
-The repository includes a Dockerfile and a Render blueprint. These are deployment configuration, **not a deployed URL**. The recommended initial public demo is Render plus Upstash; it requires configuring the host and storage accounts but does not require AWS. Vercel-specific configuration is not included, and the device's live state uses server-sent events, so the current Express deployment path should be validated before attempting a serverless conversion.
+The repository is public and includes Vercel configuration, a Dockerfile, and a Render blueprint. These are deployment files, **not a deployed URL**. Vercel deployment requires persistent Upstash credentials, account mode, and a strong signing secret; see [the deployment guide](docs/DEPLOY.md). AWS is not required. Vercel does not support the app's current in-memory live device-screen event mirror, though the regular web app and conversation API are supported.
 
-There is no public GitHub remote or deployed testing link configured in this checkout yet. Add those URLs only after publishing and verifying them.
+The GitHub repository is available at [victorhez/Hearth](https://github.com/victorhez/Hearth). No deployed test URL is configured in this checkout; add one to the submission only after publishing and verifying it.
 
 ## Privacy and limitations
 
