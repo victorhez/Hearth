@@ -13,12 +13,17 @@ test("Vercel Express entrypoint exports an app and reports missing deployment co
   delete process.env.DYNAMODB_TABLE_NAME;
   delete process.env.AWS_ROLE_ARN;
 
-  const [{ createApp }, entrypoint] = await Promise.all([
+  const [{ createApp }, entrypoint, brain] = await Promise.all([
     import("../src/server.mjs"),
     import("../src/index.mjs"),
+    import("../src/brain.mjs"),
   ]);
   assert.equal(typeof entrypoint.default, "function");
   assert.equal(typeof entrypoint.default.handle, "function");
+  const mcp = await brain.mcp("vercel-test");
+  const { tools } = await mcp.listTools();
+  assert.equal(tools.length, 10);
+  await mcp.close();
 
   const server = createApp().listen(0);
   await once(server, "listening");

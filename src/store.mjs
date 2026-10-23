@@ -34,21 +34,23 @@ const fileStore = (household) => {
 };
 
 let ddbDoc;
+async function dynamodbClient() {
+  if (!ddbDoc) {
+    const { DynamoDBClient } = await import("@aws-sdk/client-dynamodb");
+    const lib = await import("@aws-sdk/lib-dynamodb");
+    const credentials = process.env.VERCEL && process.env.AWS_ROLE_ARN
+      ? awsCredentialsProvider({ roleArn: process.env.AWS_ROLE_ARN })
+      : undefined;
+    ddbDoc = { c: lib.DynamoDBDocumentClient.from(new DynamoDBClient({ region: process.env.AWS_REGION || "us-east-1", credentials })), lib };
+  }
+  return ddbDoc;
+}
+
 const ddbStore = (household) => {
-  const T = process.env.LEGACYLINK_DDB_TABLE, pk = safe(household);
+  const T = dynamodbTable(), pk = safe(household);
   return {
     kind: "dynamodb",
-    async client() {
-      if (!ddbDoc) {
-        const { DynamoDBClient } = await import("@aws-sdk/client-dynamodb");
-        const lib = await import("@aws-sdk/lib-dynamodb");
-        const credentials = process.env.VERCEL && process.env.AWS_ROLE_ARN
-          ? awsCredentialsProvider({ roleArn: process.env.AWS_ROLE_ARN })
-          : undefined;
-        ddbDoc = { c: lib.DynamoDBDocumentClient.from(new DynamoDBClient({ region: process.env.AWS_REGION || "us-east-1", credentials })), lib };
-      }
-      return ddbDoc;
-    },
+    client: dynamodbClient,
     async all() {
       const { c, lib } = await this.client(), keys = dynamodbKeys(), out = []; let k;
       do {
@@ -86,10 +88,33 @@ const redis = async (...cmd) => {
 };
 const conversationKey = (id) => `ll:session:${crypto.createHash("sha256").update(String(id)).digest("hex")}`;
 export async function getConversation(id) {
+  if (dynamodbConfigured()) {
+    const { c, lib } = await dynamodbClient(), keys = dynamodbKeys(), key = { [keys.partition]: conversationKey(id), [keys.sort]: "state" };
+    const { Item } = await c.send(new lib.GetCommand({ TableName: dynamodbTable(), Key: key }));
+    if (!Item) return null;
+    if (Item.expiresAt <= Date.now()) {
+      await c.send(new lib.DeleteCommand({ TableName: dynamodbTable(), Key: key }));
+      return null;
+    }
+    return Item.state;
+  }
   const value = await redis("GET", conversationKey(id));
   return value ? JSON.parse(value) : null;
 }
 export async function setConversation(id, state) {
+  if (dynamodbConfigured()) {
+    const { c, lib } = await dynamodbClient(), keys = dynamodbKeys();
+    await c.send(new lib.PutCommand({
+      TableName: dynamodbTable(),
+      Item: {
+        [keys.partition]: conversationKey(id),
+        [keys.sort]: "state",
+        state,
+        expiresAt: Date.now() + 86400e3,
+      },
+    }));
+    return;
+  }
   await redis("SET", conversationKey(id), JSON.stringify(state), "EX", 86400);
 }
 

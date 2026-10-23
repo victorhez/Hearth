@@ -4,10 +4,12 @@
 //   - Otherwise: a deterministic intent router (7 languages) drives the same tools.
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import * as AI from "./llm.mjs";
 import { S, INTENT, LANGS, LANG_NAMES, SWITCH_RE, CODES } from "./i18n.mjs";
 import { parseNames } from "./i18n2.mjs";
 import { getConversation, setConversation } from "./store.mjs";
+import { buildServer } from "./tools.mjs";
 
 const sessions = new Map();
 export const session = async (id, teller, lang) => {
@@ -20,8 +22,24 @@ export const session = async (id, teller, lang) => {
 };
 
 export async function mcp(household, token, url) {
-  const base = url || process.env.LEGACYLINK_MCP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}/mcp` : `http://127.0.0.1:${process.env.PORT || 3333}/mcp`);
   const client = new Client({ name: "hearth", version: "2.0.0" });
+  if (process.env.VERCEL) {
+    const server = buildServer(household);
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    await server.connect(serverTransport);
+    try {
+      await client.connect(clientTransport);
+    } catch (error) {
+      await server.close();
+      throw error;
+    }
+    const closeClient = client.close.bind(client);
+    client.close = async () => {
+      try { await closeClient(); } finally { await server.close(); }
+    };
+    return client;
+  }
+  const base = url || process.env.LEGACYLINK_MCP_URL || `http://127.0.0.1:${process.env.PORT || 3333}/mcp`;
   const headers = { "x-household": household, ...(token ? { authorization: `Bearer ${token}` } : {}) };
   await client.connect(new StreamableHTTPClientTransport(new URL(base), { requestInit: { headers } }));
   return client;
