@@ -34,7 +34,7 @@ Only add Amazon Bedrock, Amazon Polly, or DynamoDB as services used if you have 
 
 ### Try it out links
 
-- **Demo video:** `[PASTE THE PUBLIC YOUTUBE URL HERE]`
+- **Demo video:** <https://youtu.be/biJjI4HbpH0>
 - **Code repository:** <https://github.com/victorhez/Hearth>
 - **Live test URL:** Add after deployment and a successful clean-browser test. There is no live URL configured in this checkout yet.
 

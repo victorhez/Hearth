@@ -6,6 +6,12 @@ Hearth invites elders to share memories in conversation, preserves those memorie
 
 **Repository:** [github.com/victorhez/Hearth](https://github.com/victorhez/Hearth)
 
+## Watch the demo
+
+[![Watch the Hearth demo on YouTube](https://img.youtube.com/vi/biJjI4HbpH0/hqdefault.jpg)](https://youtu.be/biJjI4HbpH0)
+
+Select the thumbnail to watch the [Hearth demo on YouTube](https://youtu.be/biJjI4HbpH0).
+
 > **Prototype status:** The web experience and conversation flows run locally. The repository includes a Raspberry Pi runtime and an MCP server, but this is not yet a packaged appliance or a completed public deployment. Live AWS services and the physical Pi audio/peripheral path have not been validated.
 
 ## The problem, and why I built Hearth
