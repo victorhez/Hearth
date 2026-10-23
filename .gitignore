@@ -3,6 +3,7 @@ data
 test/tmpdata/
 .env
 .vscode/
+docs/
 __pycache__
 video/out
 hearth-demo.mp4
