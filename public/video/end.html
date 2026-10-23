@@ -1,0 +1,29 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hearth · end card</title>
+<link rel="stylesheet" href="video.css">
+<style>
+.l1{font-size:min(3.6vw,60px);font-weight:200;line-height:1.35;font-family:Georgia,serif;font-style:italic;max-width:1400px}
+.l2{margin-top:2vh;font-size:min(3.6vw,60px);font-weight:300;color:var(--amber);font-family:Georgia,serif;font-style:italic}
+.links{margin-top:8vh;font-size:min(1.7vw,28px);letter-spacing:.14em;color:#c9c1b3;line-height:2}
+.stack{margin-top:3vh;font-size:min(1.2vw,20px);letter-spacing:.3em;text-transform:uppercase;color:#8d93a3}
+.brand{font-size:min(6vw,100px);margin-top:7vh}
+</style></head><body>
+<canvas class="bg" id="c"></canvas>
+<div class="stage"><div>
+  <div class="l1 fade" id="l1">Every family has stories worth keeping.</div>
+  <div class="l2 fade" style="animation-delay:1.1s" id="l2">Hearth makes sure they are never lost.</div>
+  <div class="brand fade" style="animation-delay:2.2s">HEARTH <i>·</i></div>
+  <div class="links fade" style="animation-delay:3s" id="links"></div>
+  <div class="stack fade" style="animation-delay:3.4s" id="stack"></div>
+</div></div>
+<div class="hint">?repo=github.com/you/legacylink &nbsp; ?demo=your-app.onrender.com &nbsp; ?bedrock=1 adds Claude on Bedrock to the stack line (only if it's true!) &nbsp; ?rec=1</div>
+<script type="module">
+import { Hearth } from "../orb.js";
+const q = new URLSearchParams(location.search), esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+if (q.get("rec")) document.body.classList.add("rec");
+if (q.get("l1")) document.getElementById("l1").textContent = q.get("l1");
+if (q.get("l2")) document.getElementById("l2").textContent = q.get("l2");
+document.getElementById("links").innerHTML = [q.get("demo") && "Try it: " + esc(q.get("demo")), q.get("repo") && "Code: " + esc(q.get("repo"))].filter(Boolean).join("<br>");
+document.getElementById("stack").textContent = ["MCP server (Streamable HTTP)", "Raspberry Pi", "7 languages", q.get("bedrock") === "1" && "Claude on Amazon Bedrock"].filter(Boolean).join(" · ");
+const orb = new Hearth(document.getElementById("c")); orb.awake = true; orb.set("idle");
+let t = 0; setInterval(() => { t += 0.04; orb.setLevel(0.06 + 0.04 * Math.sin(t)); }, 40);
+</script></body></html>

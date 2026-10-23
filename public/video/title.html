@@ -1,0 +1,14 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hearth · title card</title>
+<link rel="stylesheet" href="video.css"></head><body>
+<canvas class="bg" id="c"></canvas>
+<div class="stage" style="align-content:center"><div><div class="brand fade">HEARTH <i>·</i></div><div class="tag fade" id="tag" style="animation-delay:.8s"></div></div></div>
+<div class="hint">?tag=your own line &nbsp; ?rec=1 hides this hint</div>
+<script type="module">
+import { Hearth } from "../orb.js";
+const qs = new URLSearchParams(location.search);
+document.getElementById("tag").textContent = qs.get("tag") || "The voice that keeps your family's stories alive.";
+if (qs.get("rec")) document.body.classList.add("rec");
+const orb = new Hearth(document.getElementById("c"));
+orb.awake = true; orb.set("speaking");
+let t = 0; setInterval(() => { t += 0.05; orb.setLevel(0.25 + 0.2 * Math.sin(t) * Math.sin(t * 0.37 + 1)); }, 40);
+</script></body></html>

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Family Archive — LegacyLink</title>
+<style>
+:root{--bg:#07080c;--card:#10131b;--ink:#f4efe8;--mute:#8d93a3;--amber:#f0b86a;--line:rgba(255,255,255,.08)}
+*{box-sizing:border-box;margin:0}body{background:radial-gradient(120% 80% at 50% 0,#14161f,#07080c 70%) fixed;color:var(--ink);font-family:"Segoe UI",system-ui,sans-serif;min-height:100vh}
+header{max-width:1100px;margin:auto;padding:26px 20px 8px;display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+h1{font-weight:300;letter-spacing:.3em;font-size:18px}h1 i{font-style:normal;color:var(--amber)}
+header a{color:var(--mute);font-size:12px;letter-spacing:.2em;text-transform:uppercase;text-decoration:none}header a:hover{color:var(--amber)}
+.prompt{max-width:1100px;margin:14px auto;padding:18px 22px;border:1px solid rgba(240,184,106,.3);border-radius:16px;background:linear-gradient(90deg,rgba(240,184,106,.1),transparent);margin-inline:20px}
+@media(min-width:1140px){.prompt{margin-inline:auto}}
+.prompt small{color:var(--amber);letter-spacing:.2em;text-transform:uppercase;font-size:11px}.prompt p{font-size:22px;font-weight:300;margin-top:6px;font-family:Georgia,serif}
+main{max-width:1100px;margin:auto;padding:8px 20px 60px;display:grid;grid-template-columns:1.5fr 1fr;gap:22px}
+@media(max-width:860px){main{grid-template-columns:1fr}}
+h2{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--mute);font-weight:500;margin:18px 0 12px}
+.decade{color:var(--amber);font-family:Georgia,serif;font-size:26px;margin:22px 0 4px}
+.story{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--c,#f0b86a);border-radius:14px;padding:16px 18px;margin-bottom:12px}
+.story h3{font:400 19px Georgia,serif}.meta{font-size:12px;color:var(--mute);margin:3px 0 8px}
+.story p{color:#cfd2da;line-height:1.55;font-size:15px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.tag{font-size:11px;padding:3px 9px;border-radius:99px;border:1px solid var(--line);color:var(--mute)}
+.tag.emo{color:#f6a8c0;border-color:rgba(246,168,192,.3)}
+button.hear{margin-top:12px;background:none;border:1px solid var(--amber);color:var(--amber);border-radius:99px;padding:6px 16px;font:inherit;font-size:12px;letter-spacing:.14em;cursor:pointer}
+button.hear:hover{background:var(--amber);color:#111}
+#graph{background:var(--card);border:1px solid var(--line);border-radius:16px;width:100%;aspect-ratio:1}
+.legend{display:flex;gap:14px;font-size:11px;color:var(--mute);margin-top:8px}.legend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+.stat{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.stat div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;text-align:center}.stat b{display:block;font:300 30px Georgia,serif;color:var(--amber)}.stat span{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute)}
+</style></head><body>
+<header><h1>LEGACY<i>·</i>LINK &nbsp;FAMILY ARCHIVE</h1><a href="index.html">← Talk to Hearth</a></header>
+<div class="prompt"><small>Today's story prompt</small><p id="prompt"></p></div>
+<main><section><div id="stories"></div></section>
+<aside><div class="stat" id="stat"></div><h2>The family web</h2><svg id="graph" viewBox="0 0 400 400"></svg>
+<div class="legend"><span><i style="background:#f0b86a"></i>Storyteller</span><span><i style="background:#52d6f5"></i>Person</span><span><i style="background:#8fd694"></i>Place</span></div></aside></main>
+<script type="module">
+import { session } from "./session.js";
+const S = await session();
+const H=['#f0b86a','#52d6f5','#f58bb0','#8fd694','#b99bff','#ff9a6a'];
+fetch('/api/archive',{headers:S.headers}).then(r=>r.json()).then(a=>{
+  document.getElementById('prompt').textContent=a.prompt;
+  const tellers=[...new Set(a.memories.map(m=>m.teller))], col=t=>H[tellers.indexOf(t)%H.length];
+  const yr=m=>{const y=(m.dates.join(' ').match(/(19|20)\d\d/)||[])[0];return y?+y:null};
+  const sorted=a.memories.slice().sort((x,y)=>(yr(x)??9999)-(yr(y)??9999));
+  const box=document.getElementById('stories');let last='';
+  for(const m of sorted){const y=yr(m),d=y?Math.floor(y/10)*10+'s':'Undated';
+    if(d!==last){const e=document.createElement('div');e.className='decade';e.textContent=d;box.append(e);last=d}
+    const c=document.createElement('article');c.className='story';c.style.setProperty('--c',col(m.teller));
+    c.innerHTML=`<h3></h3><div class="meta"></div><p></p><div class="tags"></div><button class="hear">▶ HEAR IT</button>`;
+    c.querySelector('h3').textContent=m.title;c.querySelector('.meta').textContent=`${m.teller}${m.dates[0]?' · '+m.dates[0]:''}${m.places[0]?' · '+m.places[0]:''}`;
+    c.querySelector('p').textContent=m.text;
+    const t=c.querySelector('.tags');for(const p of m.people)t.insertAdjacentHTML('beforeend',`<span class="tag">${p}</span>`);for(const e of m.emotions)t.insertAdjacentHTML('beforeend',`<span class="tag emo">${e}</span>`);
+    c.querySelector('button').onclick=()=>{speechSynthesis.cancel();speechSynthesis.speak(new SpeechSynthesisUtterance(`${m.teller} told this story. ${m.text}`))};
+    box.append(c)}
+  document.getElementById('stat').innerHTML=`<div><b>${a.memories.length}</b><span>stories</span></div><div><b>${tellers.length}</b><span>voices</span></div><div><b>${new Set(a.memories.flatMap(m=>m.people)).size}</b><span>people</span></div>`;
+  // radial graph
+  const g=a.graph,svg=document.getElementById('graph'),N=g.nodes,pos={};
+  const T=N.filter(n=>n.type==='teller'),O=N.filter(n=>n.type!=='teller');
+  T.forEach((n,i)=>{const t=i/T.length*6.283;pos[n.id]=[200+Math.cos(t)*70,200+Math.sin(t)*70]});
+  O.forEach((n,i)=>{const t=i/O.length*6.283+.3;pos[n.id]=[200+Math.cos(t)*160,200+Math.sin(t)*160]});
+  let s='';for(const l of g.links)s+=`<line x1="${pos[l.source][0]}" y1="${pos[l.source][1]}" x2="${pos[l.target][0]}" y2="${pos[l.target][1]}" stroke="#f0b86a" stroke-opacity="${.12+l.w*.1}" stroke-width="${1+l.w}"/>`;
+  for(const n of N){const [x,y]=pos[n.id],c=n.type==='teller'?'#f0b86a':n.type==='place'?'#8fd694':'#52d6f5';
+    s+=`<circle cx="${x}" cy="${y}" r="${5+n.n*2}" fill="${c}" fill-opacity=".85"/><text x="${x}" y="${y-9-n.n}" fill="#cfd2da" font-size="9.5" text-anchor="middle">${n.id}</text>`}
+  svg.innerHTML=s;
+});
+</script></body></html>

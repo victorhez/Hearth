@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hearth in the Kitchen — LegacyLink</title>
+<style>
+*{box-sizing:border-box;margin:0}html,body{height:100%;overflow:hidden;background:#120d0a;font-family:"Segoe UI",system-ui,sans-serif;color:#f6efe6}
+svg#scene{position:fixed;inset:0;width:100%;height:100%}
+.bub{position:fixed;max-width:min(380px,40vw);padding:12px 16px;border-radius:18px;font-size:clamp(14px,1.5vw,19px);line-height:1.4;opacity:0;transform:translateY(8px) scale(.97);transition:.35s;pointer-events:none;z-index:3}
+.bub.on{opacity:1;transform:none}
+.bub small{display:block;font-size:10px;letter-spacing:.2em;text-transform:uppercase;opacity:.7;margin-bottom:3px}
+#bRose{left:6vw;top:14vh;background:#fff7ec;color:#3a2a1a;border-bottom-left-radius:4px}
+#bMaya{right:6vw;top:16vh;background:#e8f4ff;color:#16314a;border-bottom-right-radius:4px}
+#bDad{left:6vw;top:14vh;background:#eaf5e6;color:#1c3a1c}
+#bHearth{left:50%;transform:translateX(-50%);bottom:26vh;max-width:min(560px,70vw);background:rgba(14,16,24,.88);backdrop-filter:blur(8px);color:#f8f1e6;border:1px solid rgba(240,184,106,.45);text-align:center;font-size:clamp(15px,1.8vw,22px);font-weight:300}
+#bHearth.on{transform:translateX(-50%)}#bHearth small{color:#f0b86a}
+#klangs{position:fixed;top:44px;left:50%;transform:translateX(-50%);display:flex;gap:5px;flex-wrap:wrap;justify-content:center;z-index:4;max-width:92vw}
+#klangs button{background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.15);color:#c9b9a4;padding:4px 10px;border-radius:99px;font-size:11px;cursor:pointer}#klangs button.on{background:#f0b86a;color:#111;border-color:#f0b86a}
+#live{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:4;padding:12px 26px;border-radius:99px;border:1px solid #52d6f5;background:rgba(10,20,30,.7);color:#52d6f5;letter-spacing:.2em;font-size:11px;cursor:pointer;backdrop-filter:blur(6px)}
+#live.on{background:#52d6f5;color:#06121a;box-shadow:0 0 30px rgba(82,214,245,.5)}
+#bYou{right:6vw;bottom:24vh;background:#26364a;color:#e6f2ff;border-bottom-right-radius:4px}
+.hot{cursor:pointer}svg .hot:hover{filter:drop-shadow(0 0 16px #f0b86a)}
+#calls{position:fixed;left:18px;bottom:16px;width:min(340px,42vw);display:flex;flex-direction:column-reverse;gap:6px;z-index:3}
+.call{background:rgba(10,14,22,.7);border:1px solid rgba(82,214,245,.3);border-left:3px solid #52d6f5;border-radius:8px;padding:6px 10px;font:11px ui-monospace,Consolas,monospace;color:#cfd8e8;animation:in .4s both}
+.call b{color:#52d6f5}.call small{display:block;color:#8d93a3;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+@keyframes in{from{opacity:0;transform:translateX(-16px)}}
+#title{position:fixed;inset:0;display:grid;place-items:center;text-align:center;background:rgba(12,8,6,.82);backdrop-filter:blur(6px);z-index:9;transition:opacity .8s}
+#title h1{font-weight:200;letter-spacing:.32em;font-size:clamp(28px,5vw,56px)}#title p{margin-top:12px;color:#c9b9a4;letter-spacing:.2em;font-size:12px;text-transform:uppercase}
+#title button{margin-top:34px;padding:14px 38px;border-radius:99px;border:1px solid #f0b86a;background:none;color:#f0b86a;letter-spacing:.3em;font-size:12px;cursor:pointer}
+#title button:hover{background:#f0b86a;color:#111}
+#cap{position:fixed;top:14px;left:50%;transform:translateX(-50%);font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#c9b9a4;z-index:3;opacity:.8}
+#mayaG{transition:transform 1.2s cubic-bezier(.2,.8,.2,1),opacity 1s;transform:translateX(420px);opacity:0}#mayaG.in{transform:none;opacity:1}
+#ring{transform-origin:center;transform-box:fill-box}
+.s-idle #ringg{opacity:.45}.s-listening #ringg{stroke:#52d6f5;filter:drop-shadow(0 0 14px #52d6f5);animation:br 1.4s infinite}
+.s-thinking #ringg{stroke:#a98bff;filter:drop-shadow(0 0 14px #a98bff);stroke-dasharray:26 14;animation:sp 1.1s linear infinite}
+.s-speaking #ringg{stroke:#f0b86a;filter:drop-shadow(0 0 calc(10px + var(--lvl,0)*34px) #f0b86a);opacity:calc(.75 + var(--lvl,0)*.25)}
+@keyframes br{50%{opacity:.5}}@keyframes sp{to{stroke-dashoffset:-80}}
+#ringg{stroke:#f0b86a;stroke-width:7;fill:none;transform-origin:center;transform-box:fill-box}
+.bob{transform-box:fill-box;transform-origin:50% 100%}
+svg[data-talk=rose] #roseG .bob,svg[data-talk=maya] #mayaG .bob{animation:talk .42s ease-in-out infinite alternate}
+@keyframes talk{from{transform:translateY(0) rotate(-.4deg)}to{transform:translateY(-5px) rotate(.5deg)}}
+#roseG .bob,#mayaG .bob{animation:breathe 4s ease-in-out infinite alternate}@keyframes breathe{to{transform:scaleY(1.008)}}
+svg#scene{animation:push 120s linear forwards;transform-origin:50% 60%}@keyframes push{to{transform:scale(1.07)}}
+#end{position:fixed;inset:0;display:grid;place-items:center;text-align:center;background:radial-gradient(circle at 50% 45%,rgba(40,26,14,.88),rgba(8,6,5,.96));z-index:8;opacity:0;pointer-events:none;transition:opacity 1.6s}
+#end.on{opacity:1}#end h1{font-weight:200;letter-spacing:.4em;font-size:clamp(34px,6vw,72px)}#end h1 i{font-style:normal;color:#f0b86a}
+#end p{margin-top:18px;font-size:clamp(14px,1.8vw,22px);font-weight:300;color:#e6d8c4;letter-spacing:.06em;font-family:Georgia,serif;font-style:italic}
+#end small{display:block;margin-top:34px;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#a99a86;font-style:normal;font-family:system-ui}
+.glow{animation:fl 3s infinite alternate}@keyframes fl{to{opacity:.8}}
+</style></head><body>
+<svg id="scene" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" class="s-idle">
+<defs>
+ <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b2a20"/><stop offset="1" stop-color="#5a3f2e"/></linearGradient>
+ <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb470"/><stop offset="1" stop-color="#ffe6b8"/></linearGradient>
+ <linearGradient id="counter" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8a6a4d"/><stop offset="1" stop-color="#5b4331"/></linearGradient>
+ <radialGradient id="lamp" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ffd48a" stop-opacity=".75"/><stop offset="1" stop-color="#ffd48a" stop-opacity="0"/></radialGradient>
+ <radialGradient id="sun" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ffcf8a" stop-opacity=".5"/><stop offset="1" stop-color="#ffcf8a" stop-opacity="0"/></radialGradient>
+ <pattern id="tile" width="60" height="40" patternUnits="userSpaceOnUse"><rect width="60" height="40" fill="#6b4e3a"/><rect x="1" y="1" width="58" height="38" rx="3" fill="#7a5a44"/></pattern>
+</defs>
+<rect width="1600" height="900" fill="url(#wall)"/>
+<rect y="470" width="1600" height="190" fill="url(#tile)" opacity=".8"/>
+<!-- window -->
+<g transform="translate(1090 110)"><rect width="330" height="300" rx="10" fill="#2a1d15"/><rect x="14" y="14" width="302" height="272" fill="url(#sky)"/>
+ <path d="M14 250 L90 200 L150 235 L230 180 L316 240 L316 286 L14 286Z" fill="#c9825a" opacity=".55"/><rect x="159" y="14" width="12" height="272" fill="#2a1d15"/><rect x="14" y="145" width="302" height="10" fill="#2a1d15"/></g>
+<ellipse cx="1250" cy="330" rx="420" ry="300" fill="url(#sun)"/>
+<!-- cabinets -->
+<g fill="#4a3426" stroke="#2c1e15" stroke-width="3"><rect x="70" y="70" width="300" height="250" rx="8"/><rect x="390" y="70" width="300" height="250" rx="8"/></g>
+<g fill="#d7b98c"><circle cx="330" cy="240" r="7"/><circle cx="430" cy="240" r="7"/></g>
+<!-- shelf -->
+<rect x="720" y="260" width="300" height="12" fill="#2c1e15"/><g><rect x="740" y="205" width="40" height="55" rx="6" fill="#c75d4a"/><rect x="792" y="220" width="36" height="40" rx="6" fill="#d9a441"/><rect x="842" y="195" width="46" height="65" rx="8" fill="#6a8f6a"/><circle cx="950" cy="238" r="22" fill="#e9dcc4"/></g>
+<!-- pendant lamp -->
+<line x1="800" y1="0" x2="800" y2="130" stroke="#201510" stroke-width="4"/><path d="M750 190 Q800 110 850 190Z" fill="#d9a441"/><ellipse class="glow" cx="800" cy="260" rx="260" ry="220" fill="url(#lamp)"/>
+<!-- counter -->
+<rect y="640" width="1600" height="28" fill="url(#counter)"/><rect y="668" width="1600" height="232" fill="#3a2a20"/>
+<g stroke="#2a1d15" stroke-width="3" fill="#47342a"><rect x="40" y="690" width="360" height="190" rx="6"/><rect x="440" y="690" width="360" height="190" rx="6"/><rect x="840" y="690" width="360" height="190" rx="6"/><rect x="1240" y="690" width="320" height="190" rx="6"/></g>
+<!-- props -->
+<g><path d="M1210 640 l8 -70 h60 l8 70z" fill="#b5894f"/><path d="M1245 570 q-10 -50 10 -80 q15 30 -2 80z" fill="#5f8a55"/><path d="M1262 570 q25 -40 55 -30 q-20 30 -55 30z" fill="#6f9c63"/><path d="M1240 575 q-35 -30 -60 -10 q25 25 60 10z" fill="#4f7a47"/></g>
+<g><rect x="1420" y="570" width="70" height="70" rx="12" fill="#c75d4a"/><rect x="1410" y="560" width="90" height="18" rx="8" fill="#a84a3a"/><path d="M1490 600 q35 -5 25 25" stroke="#a84a3a" stroke-width="8" fill="none"/></g>
+<g><ellipse cx="520" cy="628" rx="70" ry="14" fill="#e9dcc4"/><circle cx="495" cy="608" r="20" fill="#d9503b"/><circle cx="535" cy="610" r="19" fill="#e0a43a"/><circle cx="515" cy="597" r="18" fill="#7aa35a"/></g>
+<!-- Grandma Rose -->
+<g id="roseG" class="hot" transform="translate(250 0)"><g class="bob">
+ <path d="M130 640 Q120 470 150 430 Q190 400 230 430 Q260 470 250 640Z" fill="#8a4f6b"/><path d="M130 520 h120 v14 h-120z" fill="#6f3b55"/>
+ <rect x="168" y="396" width="44" height="40" rx="16" fill="#e8c4a0"/><circle cx="190" cy="360" r="46" fill="#efcba8"/>
+ <path d="M144 352 Q150 296 192 300 Q236 304 238 350 Q214 322 190 322 Q166 322 144 352Z" fill="#d9d6d2"/><circle cx="190" cy="294" r="22" fill="#d9d6d2"/>
+ <circle cx="174" cy="362" r="4" fill="#3a2a1a"/><circle cx="206" cy="362" r="4" fill="#3a2a1a"/><path d="M174 382 q16 12 32 0" stroke="#a5604a" stroke-width="4" fill="none" stroke-linecap="round"/>
+ <circle cx="166" cy="362" r="12" fill="none" stroke="#6b5a4a" stroke-width="2.5"/><circle cx="214" cy="362" r="12" fill="none" stroke="#6b5a4a" stroke-width="2.5"/>
+ <rect x="102" y="480" width="40" height="150" rx="18" fill="#8a4f6b" transform="rotate(8 120 480)"/><rect x="238" y="480" width="40" height="150" rx="18" fill="#8a4f6b" transform="rotate(-8 258 480)"/>
+</g></g>
+<!-- Maya -->
+<g id="mayaG" class="hot" transform="translate(1050 0)"><g class="bob">
+ <path d="M60 640 Q50 480 82 450 Q120 428 156 450 Q186 480 178 640Z" fill="#4a7fb0"/><rect x="98" y="418" width="36" height="38" rx="14" fill="#c9966c"/><circle cx="116" cy="384" r="40" fill="#d4a176"/>
+ <path d="M72 380 Q72 332 118 334 Q162 336 160 380 Q150 350 116 350 Q88 350 72 380Z" fill="#2a1d15"/><path d="M76 372 q-14 70 6 120" stroke="#2a1d15" stroke-width="22" fill="none" stroke-linecap="round"/>
+ <circle cx="102" cy="388" r="3.5" fill="#2a1d15"/><circle cx="130" cy="388" r="3.5" fill="#2a1d15"/><path d="M104 404 q12 9 24 0" stroke="#8a4a3a" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+</g></g>
+<!-- Hearth device -->
+<g id="device" class="hot" transform="translate(700 0)">
+ <ellipse cx="100" cy="640" rx="64" ry="12" fill="#000" opacity=".35"/>
+ <path d="M42 640 V548 Q42 520 100 520 Q158 520 158 548 V640Z" fill="#2b2f3a"/><path d="M42 548 Q42 520 100 520 Q158 520 158 548 Q158 534 100 534 Q42 534 42 548Z" fill="#454b5b"/>
+ <path d="M52 600 H148" stroke="#1a1d25" stroke-width="2"/><path d="M52 612 H148" stroke="#1a1d25" stroke-width="2"/><path d="M52 624 H148" stroke="#1a1d25" stroke-width="2"/>
+ <ellipse cx="100" cy="522" rx="58" ry="14" fill="none" stroke="#1a1d25" stroke-width="2"/>
+ <g id="ringg-wrap"><ellipse id="ringg" cx="100" cy="526" rx="54" ry="13"/></g>
+</g>
+</svg>
+<div id="cap">THE KITCHEN · SUNDAY MORNING</div>
+<div id="klangs"></div><button id="live">YOUR TURN · SPEAK TO HEARTH</button>
+<div class="bub" id="bYou"></div><div class="bub" id="bRose"></div><div class="bub" id="bMaya"></div><div class="bub" id="bDad"></div><div class="bub" id="bHearth"></div>
+<div id="calls"></div>
+<div id="end"><div><h1>HEARTH <i>·</i></h1><p><span id="end1">Every family has stories worth keeping.</span><br><span id="end2">Hearth makes sure they are never lost.</span></p><small>Built on Alexa+ MCP · Claude on Amazon Bedrock · Raspberry Pi</small></div></div>
+<div id="title"><div><h1>HEARTH</h1><p id="tsub">A day in the kitchen · the voice that keeps your family's stories</p><button id="play">PLAY SCENE</button><p id="tnote" style="margin-top:18px;text-transform:none;letter-spacing:.04em;opacity:.7">Voices are neural TTS · every reply is a real MCP tool call</p></div></div>
+<script type="module">
+import { Voice } from "./voice.js";
+import { SCRIPT } from "./kitchen-script.js";
+const $ = (id) => document.getElementById(id), voice = new Voice(), scene = $("scene"), HH = "kitchen";
+import { session } from "./session.js";
+const { headers: H, token: KTOKEN } = await session({ mode: "kitchen" });
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const state = (s) => { scene.setAttribute("class", "s-" + s); };
+let quiz = null, lang = localStorage.getItem("hl-lang") || "en", running = false, liveOn = false, reactions = [];
+setInterval(() => scene.style.setProperty("--lvl", voice.outLevel().toFixed(2)), 60);
+
+async function bubble(id, who, text, voiceId, l = "en") {
+  const b = $(id); b.innerHTML = `<small></small><span></span>`; b.children[0].textContent = who; b.children[1].textContent = text; b.classList.add("on");
+  await voice.speak(text, voiceId, { lang: l, token: KTOKEN });
+  await sleep(350); b.classList.remove("on");
+}
+function calls(list, engine) {
+  const box = $("calls");
+  for (const c of list.slice(-2)) {
+    const d = document.createElement("div"); d.className = "call"; d.innerHTML = "<b></b><small></small>";
+    d.children[0].textContent = "tools/call · " + c.tool; d.children[1].textContent = JSON.stringify(c.args).slice(0, 80);
+    box.prepend(d); while (box.children.length > 5) box.lastChild.remove(); setTimeout(() => d.remove(), 16000);
+  }
+}
+async function turn(person, spoken, sent, teller, l = "en") {
+  const [bid, name, vid] = person === "rose" ? ["bRose", "Grandma Rose", "rose"] : person === "maya" ? ["bMaya", "Maya", "maya"] : ["bDad", "Dad", "dad"];
+  state("listening"); scene.dataset.talk = vid; await bubble(bid, name, spoken, vid, l); scene.dataset.talk = "";
+  state("thinking");
+  const out = await fetch("/api/say", { method: "POST", headers: H, body: JSON.stringify({ session: "k", utterance: sent ?? spoken, teller, lang: l }) }).then((r) => r.json());
+  calls(out.calls || [], out.engine);
+  const q = (out.calls || []).find((c) => c.tool === "generate_quiz"); if (q) quiz = { qs: q.result.questions, i: 0 };
+  state("speaking"); await bubble("bHearth", "Hearth", out.reply, "hearth", out.lang || l);
+  state("idle"); await sleep(500); return out;
+}
+
+function applyUi() {
+  const u = SCRIPT[lang]?.ui || SCRIPT.en.ui;
+  $("cap").textContent = u.cap3; $("play").textContent = u.play; $("live").textContent = u.live;
+  $("tsub").textContent = u.sub; $("tnote").textContent = u.note; $("end1").textContent = u.end1; $("end2").textContent = u.end2;
+}
+let readyLang = null;
+async function seedFor(l) {
+  if (readyLang === l) return;
+  await fetch("/api/demo/reset?lang=" + (l === "en" ? "" : l), { method: "POST", headers: H });
+  readyLang = l;
+}
+async function run() {
+  running = true;
+  const sc = SCRIPT[lang] || SCRIPT.en, L = SCRIPT[lang] ? lang : "en";
+  $("title").style.opacity = 0; setTimeout(() => ($("title").style.display = "none"), 800);
+  await seedFor(L);
+  // warm the voice cache so there is no dead air between lines
+  for (const k of ["tell", "p1", "p2", "done", "ask", "quiz", "thanks"]) fetch(`/api/tts?who=${["ask", "quiz", "thanks"].includes(k) ? "maya" : "rose"}&lang=${L}&token=${KTOKEN}&text=${encodeURIComponent(sc[k])}`).catch(() => {});
+  await sleep(1200);
+  const R = "Grandma Rose";
+  $("cap").textContent = sc.ui.cap1;
+  await turn("rose", sc.tell, null, R, L);
+  await turn("rose", sc.p1, null, R, L);
+  await turn("rose", sc.p2, null, R, L);
+  await turn("rose", sc.done, null, R, L);
+  await sleep(900);
+  $("cap").textContent = sc.ui.cap2; $("mayaG").classList.add("in"); await sleep(1500);
+  await turn("maya", sc.ask, null, "Maya", L);
+  await turn("maya", sc.quiz, null, "Maya", L);
+  for (let k = 0; k < 3 && quiz; k++) {
+    const q = quiz.qs[quiz.i++]; if (!q) break;
+    const ans = k === 1 ? q.choices.find((c) => c !== q.answer) : q.answer;
+    const out = await turn("maya", ans, null, "Maya", L);
+    if (!out.mode || out.mode === "idle") break;
+  }
+  await turn("maya", sc.thanks, null, "Maya", L);
+  $("cap").textContent = "HEARTH · LEGACYLINK"; await sleep(1500); $("end").classList.add("on"); running = false;
+}
+$("play").onclick = () => run().catch((e) => console.error(e));
+// ---------- interactive mode: the viewer is a person in the kitchen ----------
+const PHRASES = {
+  tell: { en: "Hey Hearth, I want to tell you a story.", es: "Hey Hearth, quiero contarte una historia.", fr: "Hey Hearth, je veux vous raconter une histoire.", zh: "Hey Hearth，我想讲一个故事。", pt: "Hey Hearth, quero te contar uma história.", de: "Hey Hearth, ich möchte dir eine Geschichte erzählen.", hi: "Hey Hearth, मैं आपको एक कहानी सुनाना चाहता हूँ।" },
+  quiz: { en: "Hey Hearth, quiz me on the family stories.", es: "Hey Hearth, hazme un cuestionario.", fr: "Hey Hearth, fais-moi un quiz.", zh: "Hey Hearth，考考我。", pt: "Hey Hearth, faça um quiz comigo.", de: "Hey Hearth, mach ein Quiz mit mir.", hi: "Hey Hearth, मुझसे क्विज़ लो।" },
+  ask: { en: "Hey Hearth, what did Grandma Rose say about Dayton?", es: "Hey Hearth, ¿qué dijo Abuela Carmen sobre la feria?", fr: "Hey Hearth, qu'est-ce que Mamie Colette a dit sur le pain ?", zh: "Hey Hearth，奶奶王梅说过什么关于第一份工作", pt: "Hey Hearth, o que a Vovó Lúcia contou sobre o Rio?", de: "Hey Hearth, was hat Oma Greta über Weihnachten gesagt?", hi: "Hey Hearth, दादी सरला ने शादी के बारे में क्या कहा?" },
+};
+async function loadLang(l) {
+  const r = await fetch("/api/i18n?lang=" + l).then((x) => x.json());
+  lang = r.lang; reactions = r.reactions; applyUi(); voice.lang = r.langs.find((x) => x.code === lang).sr; localStorage.setItem("hl-lang", lang);
+  $("klangs").innerHTML = "";
+  for (const x of r.langs) { const b = document.createElement("button"); b.textContent = x.native; b.className = x.code === lang ? "on" : ""; b.onclick = () => { loadLang(x.code); voice.restartRec(); }; $("klangs").append(b); }
+}
+loadLang(lang);
+let ready = false;
+async function ensureReady() {
+  await seedFor(lang);
+  if (!ready) { ready = true; $("title").style.opacity = 0; setTimeout(() => ($("title").style.display = "none"), 600); }
+}
+async function liveTurn(text, teller = "Maya") {
+  if (running) return;
+  running = true;
+  try {
+    await ensureReady();
+    state("listening");
+    const b = $("bYou"); b.innerHTML = "<small></small><span></span>"; b.children[0].textContent = teller; b.children[1].textContent = text; b.classList.add("on");
+    await sleep(1400); b.classList.remove("on");
+    state("thinking");
+    const out = await fetch("/api/say", { method: "POST", headers: H, body: JSON.stringify({ session: "live", utterance: text, teller, lang }) }).then((r) => r.json());
+    calls(out.calls || [], out.engine);
+    if (out.lang && out.lang !== lang) await loadLang(out.lang);
+    state("speaking");
+    await bubble("bHearth", "Hearth", out.reply, "hearth", out.lang || lang);
+    await family(out);
+    state("idle");
+  } finally { running = false; }
+}
+// the family reacts to Hearth the way people would
+async function family(out) {
+  if (out.story && reactions.length) {
+    scene.dataset.talk = "rose";
+    await bubble("bRose", "Grandma Rose", reactions[Math.floor(Math.random() * reactions.length)], "rose", out.lang || lang);
+    scene.dataset.talk = "";
+  }
+}
+for (const [id, kind, teller] of [["roseG", "tell", "Grandma Rose"], ["mayaG", "quiz", "Maya"], ["device", "ask", "Maya"]]) {
+  $(id).addEventListener("click", async () => {
+    if (running) return;
+    running = true;
+    try {
+      await ensureReady();
+      if (id === "mayaG") $("mayaG").classList.add("in");
+      const person = id === "roseG" ? "rose" : "maya";
+      const out = await turn(person, PHRASES[kind][lang] || PHRASES[kind].en, null, teller, lang);
+      if (out.lang && out.lang !== lang) await loadLang(out.lang);
+      await family(out);
+    } finally { running = false; }
+  });
+}
+$("live").onclick = async () => {
+  liveOn = !liveOn; $("live").classList.toggle("on", liveOn);
+  if (liveOn) { await ensureReady(); await voice.start(); } else { voice.alive = false; voice.pauseRec(); }
+};
+let pending = [], ptimer;
+voice.addEventListener("final", (e) => {
+  if (!liveOn || running) return;
+  pending.push(e.detail); clearTimeout(ptimer);
+  ptimer = setTimeout(() => { const t = pending.join(" "); pending = []; liveTurn(t); }, 900);
+});
+
+if (new URLSearchParams(location.search).get("autoplay") === "1") run();
+</script></body></html>

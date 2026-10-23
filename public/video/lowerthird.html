@@ -1,0 +1,21 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hearth · lower third</title>
+<link rel="stylesheet" href="video.css">
+<style>
+body{background:transparent}
+.lt{position:fixed;left:6vw;bottom:9vh;display:flex;align-items:stretch;opacity:0;transform:translateX(-40px);animation:in .9s .2s cubic-bezier(.2,.8,.2,1) forwards,out .7s var(--hold,5s) ease forwards}
+.lt .bar{width:6px;background:var(--amber);border-radius:3px;margin-right:18px}
+.lt h1{font-weight:500;font-size:min(3.4vw,60px);letter-spacing:.02em;text-shadow:0 2px 14px rgba(0,0,0,.8)}
+.lt p{margin-top:4px;font-size:min(1.8vw,30px);font-weight:300;color:#e9dfcf;text-shadow:0 2px 14px rgba(0,0,0,.8)}
+@keyframes in{to{opacity:1;transform:none}}@keyframes out{to{opacity:0;transform:translateX(-30px)}}
+.cap{position:fixed;left:50%;bottom:7vh;transform:translateX(-50%);max-width:80vw;text-align:center;font-size:min(2.6vw,46px);font-weight:500;padding:.4em .9em;border-radius:12px;background:rgba(0,0,0,.55);text-shadow:0 2px 10px #000;opacity:0;animation:in .6s ease forwards}
+</style></head><body>
+<!-- ?name=Victor Hayes&role=Creator of Hearth&hold=6   |   ?caption=Hearth recognises Victor by voice   |   ?bg=green for chroma-key -->
+<div id="o"></div>
+<script>
+const q = new URLSearchParams(location.search), o = document.getElementById("o");
+if (q.get("bg") === "green") document.body.classList.add("green");
+document.documentElement.style.setProperty("--hold", (+q.get("hold") || 5) + "s");
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+if (q.get("caption")) o.innerHTML = `<div class="cap">${esc(q.get("caption"))}</div>`;
+else o.innerHTML = `<div class="lt"><div class="bar"></div><div><h1>${esc(q.get("name") || "Victor Hayes")}</h1><p>${esc(q.get("role") || "Creator of Hearth")}</p></div></div>`;
+</script></body></html>

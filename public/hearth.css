@@ -1,0 +1,38 @@
+:root{--bg:#07080c;--ink:#f4efe8;--mute:#8d93a3;--amber:#f0b86a;--cyan:#52d6f5;--line:rgba(255,255,255,.09)}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;background:radial-gradient(120% 90% at 50% 40%,#12141d 0%,#07080c 70%);color:var(--ink);font-family:"Segoe UI",system-ui,-apple-system,sans-serif;overflow:hidden}
+canvas#stage{position:fixed;inset:0;width:100%;height:100%}
+.hud{position:fixed;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--mute)}
+.top-l{top:20px;left:24px}.top-r{top:20px;right:24px;text-align:right}
+.brand{font-weight:600;color:var(--ink);letter-spacing:.34em}.brand i{font-style:normal;color:var(--amber)}
+.status{display:flex;gap:8px;align-items:center;margin-top:8px}.dot{width:7px;height:7px;border-radius:50%;background:var(--mute);box-shadow:0 0 10px currentColor;color:var(--mute)}
+.dot.on{background:var(--cyan);color:var(--cyan)}
+.who{margin-top:14px;display:flex;gap:6px;flex-wrap:wrap}
+.who button{background:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--mute);padding:5px 11px;border-radius:99px;font:inherit;letter-spacing:.12em;cursor:pointer}
+.who button.on{color:#14100a;background:var(--amber);border-color:var(--amber)}
+#captions{position:fixed;left:50%;transform:translateX(-50%);bottom:9vh;width:min(820px,90vw);text-align:center;pointer-events:none}
+#you{min-height:26px;font-size:clamp(15px,2vw,20px);color:var(--cyan);font-style:italic;opacity:.9;margin-bottom:12px;transition:opacity .4s}
+#say{font-size:clamp(20px,3vw,34px);line-height:1.35;font-weight:300;text-shadow:0 2px 24px rgba(0,0,0,.8);min-height:46px}
+#say span{opacity:.28;transition:opacity .25s}#say span.on{opacity:1}
+#hint{margin-top:18px;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute);min-height:16px}
+#calls{position:fixed;right:22px;top:92px;width:min(330px,38vw);display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.call{background:rgba(10,14,22,.62);backdrop-filter:blur(8px);border:1px solid rgba(82,214,245,.28);border-left:3px solid var(--cyan);border-radius:10px;padding:9px 12px;font:12px ui-monospace,Consolas,monospace;color:#cfd8e8;animation:in .5s ease both;transition:opacity 1s}
+.call b{color:var(--cyan);font-weight:600}.call small{display:block;color:var(--mute);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.call.engine-bedrock{border-left-color:var(--amber)}
+@keyframes in{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
+#gate{position:fixed;inset:0;display:grid;place-items:center;background:rgba(5,6,9,.74);backdrop-filter:blur(10px);z-index:9;text-align:center;cursor:pointer;transition:opacity .6s}
+#gate h1{font-weight:200;font-size:clamp(34px,6vw,64px);letter-spacing:.3em}#gate h1 i{font-style:normal;color:var(--amber)}
+#gate p{margin-top:16px;color:var(--mute);letter-spacing:.2em;text-transform:uppercase;font-size:12px}
+#gate .tap{margin-top:36px;display:inline-block;padding:14px 34px;border:1px solid var(--amber);border-radius:99px;color:var(--amber);letter-spacing:.3em;font-size:12px;animation:pulse 2.2s infinite}
+@keyframes pulse{50%{box-shadow:0 0 34px rgba(240,184,106,.35)}}
+#typebox{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);display:none}
+#typebox input{width:min(380px,80vw);background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--ink);padding:8px 12px;border-radius:99px;font:13px inherit}
+nav.links{position:fixed;bottom:18px;right:24px;display:flex;gap:18px}
+nav.links a{color:var(--mute);text-decoration:none;font-size:11px;letter-spacing:.2em;text-transform:uppercase}nav.links a:hover{color:var(--amber)}
+@media(max-width:700px){#calls{top:auto;bottom:34vh;right:10px;left:10px;width:auto}.call:nth-child(n+3){display:none}#captions{bottom:6vh}nav.links{display:none}.top-r{display:none}}
+
+#langs{position:fixed;top:64px;right:24px;display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;max-width:min(380px,50vw);z-index:5}
+#langs button{background:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--mute);padding:4px 10px;border-radius:99px;font:inherit;font-size:11px;letter-spacing:.06em;cursor:pointer}
+#langs button.on{color:#14100a;background:var(--cyan);border-color:var(--cyan)}#langs button:hover{color:var(--ink)}
+#calls{top:128px}
+@media(max-width:700px){#langs{top:auto;bottom:10px;left:10px;right:10px;max-width:none;justify-content:center}}

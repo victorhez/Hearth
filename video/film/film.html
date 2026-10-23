@@ -1,0 +1,65 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Hearth film</title>
+<style>
+*{box-sizing:border-box;margin:0}html,body{width:1920px;height:1080px;overflow:hidden;background:#000;font-family:"Segoe UI",system-ui,Arial,sans-serif;color:#f6f0e6}
+#frame{position:absolute;left:0;top:0;width:1920px;height:1080px;overflow:hidden;background:#05060a}
+#world{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0}
+#art,#insideSvg{position:absolute;left:0;top:0}
+.tv{position:absolute;left:1230px;top:150px;width:430px;height:268px;background:#0a0b10;border:14px solid #1b1c22;border-radius:14px;box-shadow:0 14px 40px rgba(0,0,0,.5),0 0 60px rgba(240,184,106,.18);overflow:hidden}
+.tv canvas{position:absolute;left:0;top:0;width:402px;height:240px}
+.tv .lbl{position:absolute;left:10px;bottom:6px;font-size:13px;letter-spacing:.25em;color:#8d93a3;text-transform:uppercase}
+.tv .lang{position:absolute;right:10px;bottom:6px;font-size:14px;color:#52d6f5;letter-spacing:.08em}
+.phone{position:absolute;left:1500px;top:250px;width:300px;height:620px;border-radius:42px;background:#111;border:6px solid #3a3a44;box-shadow:0 20px 60px rgba(0,0,0,.6);overflow:hidden}
+.phone canvas{position:absolute;left:16px;top:60px;width:268px;height:420px}
+.phone .t{position:absolute;top:22px;left:0;right:0;text-align:center;font-size:14px;letter-spacing:.3em;color:#9aa0ae}
+.phone .h{position:absolute;bottom:34px;left:0;right:0;text-align:center;font-size:16px;color:#c9c1b3}
+#sub{position:absolute;left:50%;bottom:58px;transform:translateX(-50%);width:1500px;text-align:center;font-size:42px;line-height:1.28;text-shadow:0 2px 14px rgba(0,0,0,.95)}
+#sub .pill{display:inline-block;padding:12px 30px;border-radius:18px;background:rgba(6,8,14,.66);backdrop-filter:blur(6px)}
+#sub .nm{display:block;font-size:20px;letter-spacing:.28em;text-transform:uppercase;margin-bottom:4px;font-weight:600}
+#sub .tr{display:block;font-size:30px;color:#cfc8bb;margin-top:6px;font-style:italic}
+#chip{position:absolute;left:46px;top:40px;font-size:20px;letter-spacing:.34em;text-transform:uppercase;color:#f0b86a;padding:10px 18px;border-left:4px solid #f0b86a;background:rgba(5,6,10,.55)}
+#disc{position:absolute;left:46px;bottom:18px;font-size:15px;color:#c9c1b3;letter-spacing:.06em;opacity:.8}
+#tools{position:absolute;right:40px;top:40px;width:560px;display:flex;flex-direction:column;gap:8px}
+.tool{font:20px ui-monospace,Consolas,monospace;background:rgba(8,12,22,.74);border:1px solid rgba(82,214,245,.35);border-left:4px solid #52d6f5;border-radius:10px;padding:8px 14px;color:#d4deef}
+.tool b{color:#52d6f5}.tool small{display:block;color:#8d93a3;font-size:16px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#lower{position:absolute;left:50%;bottom:210px;transform:translateX(-50%);padding:16px 36px;border-radius:14px;background:linear-gradient(90deg,rgba(240,184,106,.92),rgba(240,160,80,.92));color:#1a1209;font-size:34px;font-weight:600;letter-spacing:.02em;white-space:nowrap}
+#dip{position:absolute;inset:0;background:#05060a;opacity:0}
+#title,#end{position:absolute;inset:0;background:#05060a;text-align:center}
+#title canvas,#end canvas{position:absolute;inset:0;width:1920px;height:1080px}
+.big{position:absolute;left:0;right:0;top:420px;font-weight:200;font-size:170px;letter-spacing:.5em;text-indent:.5em}.big i{font-style:normal;color:#f0b86a}
+.tag{position:absolute;left:0;right:0;top:640px;font-family:Georgia,serif;font-style:italic;font-size:40px;color:#d9d1c4}
+#montage{position:absolute;inset:0;background:rgba(5,6,10,.78);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 160px}
+#montage .n{font-weight:200;font-size:190px;letter-spacing:.06em}
+#montage .g{margin-top:20px;font-size:46px;color:#e8dfd0;line-height:1.3}
+#montage .e{margin-top:18px;font-size:30px;color:#9aa0ae;font-style:italic}
+#proof{position:absolute;inset:0;background:#070a12;padding:120px 170px}
+#proof .win{background:#0b1020;border:1px solid #26314d;border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.6);height:100%;overflow:hidden}
+#proof .bar{height:54px;background:#121a30;display:flex;align-items:center;padding:0 22px;gap:10px;color:#8d93a3;font-size:20px;letter-spacing:.1em}
+#proof .bar i{width:16px;height:16px;border-radius:50%;display:inline-block}
+#proof pre{padding:28px 36px;font:27px/1.5 ui-monospace,Consolas,monospace;color:#cfe3ff;white-space:pre-wrap}
+#proof .ok{color:#7ee787}#proof .k{color:#52d6f5}#proof .m{color:#8d93a3}#proof .a{color:#f0b86a}
+.card{position:absolute;left:0;right:0;text-align:center}
+</style>
+<script>
+// deterministic clock: orb.js reads performance.now() and requestAnimationFrame; the renderer drives both by hand.
+window.VT = 0; window.RAFQ = [];
+performance.now = () => window.VT;
+window.requestAnimationFrame = (cb) => { window.RAFQ.push(cb); return 0; };
+window.flushRaf = () => { const q = window.RAFQ.splice(0); q.forEach((cb) => cb(window.VT)); };
+</script></head><body>
+<div id="frame">
+  <div id="world">
+    <svg id="art" width="1920" height="1080" viewBox="0 0 1920 1080"></svg>
+    <div class="tv" id="tv"><canvas id="tvCv"></canvas><div class="lbl" id="tvLbl"></div><div class="lang" id="tvLang"></div></div>
+    <div class="phone" id="phone"><div class="t">HEARTH · LEGACYLINK</div><canvas id="phCv"></canvas><div class="h">Say “Hey Hearth”</div></div>
+  </div>
+  <svg id="insideSvg" width="1920" height="1080" viewBox="0 0 1920 1080" style="opacity:0"></svg>
+  <div id="proof" style="opacity:0"><div class="win"><div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i>&nbsp; hearth: real tool calls</div><pre id="proofText"></pre></div></div>
+  <div id="montage" style="opacity:0"><div class="n" id="mN"></div><div class="g" id="mG"></div><div class="e" id="mE"></div></div>
+  <div id="chip" style="opacity:0"></div><div id="tools"></div><div id="lower" style="opacity:0"></div>
+  <div id="sub"></div><div id="disc">Illustrated demonstration · fictional family · Hearth's replies are real output from the project's server</div>
+  <div id="title"><canvas id="bigCv" width="1920" height="1080"></canvas><div class="big" id="tBig">HEARTH <i>·</i></div><div class="tag" id="tTag">The voice that keeps your family's stories alive.</div></div>
+  <div id="end" style="opacity:0"><canvas id="endCv" width="1920" height="1080"></canvas><div class="card" style="top:250px;font-family:Georgia,serif;font-style:italic;font-size:54px;line-height:1.4;color:#f0e6d2">Every family has stories worth keeping.<br><span style="color:#f0b86a">Hearth makes sure they are never lost.</span></div><div class="big" style="top:560px;font-size:130px">HEARTH <i>·</i></div><div class="card" style="top:760px;font-size:26px;letter-spacing:.3em;color:#9aa0ae;text-transform:uppercase">MCP server · Raspberry Pi · 7 languages · open source</div><div class="card" style="top:830px;font-size:24px;color:#c9c1b3">Next: Yoruba · Igbo · Hausa (planned)</div></div>
+  <div id="dip"></div>
+</div>
+<script type="module" src="film.js"></script>
+</body></html>

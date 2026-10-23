@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Your family — Hearth</title>
+<style>
+:root{--bg:#07080c;--card:#10131b;--ink:#f4efe8;--mute:#8d93a3;--amber:#f0b86a;--cyan:#52d6f5;--line:rgba(255,255,255,.1);--bad:#ff8a8a}
+*{box-sizing:border-box;margin:0}body{background:radial-gradient(120% 80% at 50% 0,#14161f,#07080c 70%) fixed;color:var(--ink);font-family:"Segoe UI",system-ui,sans-serif;min-height:100vh;display:grid;place-items:start center;padding:28px 16px}
+main{width:min(560px,100%)}h1{font-weight:200;letter-spacing:.34em;font-size:26px;text-align:center}h1 i{font-style:normal;color:var(--amber)}
+.sub{color:var(--mute);text-align:center;margin:8px 0 24px;font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:14px}
+.card h2{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--mute);font-weight:500;margin-bottom:12px}
+.demo{border-color:rgba(240,184,106,.4);background:linear-gradient(135deg,rgba(240,184,106,.12),transparent)}.demo p{color:#d6cfc4;font-size:14px;margin-bottom:14px}
+label{display:block;font-size:12px;color:var(--mute);margin:10px 0 4px}input{width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:#0a0c12;color:var(--ink);font:15px inherit}
+input:focus{outline:2px solid var(--cyan);border-color:transparent}
+button{margin-top:14px;padding:12px 20px;border-radius:99px;border:1px solid var(--amber);background:none;color:var(--amber);font:600 13px inherit;letter-spacing:.14em;cursor:pointer}button:hover{background:var(--amber);color:#111}
+button.primary{background:var(--amber);color:#111}button.ghost{border-color:var(--line);color:var(--mute)}
+.tabs{display:flex;gap:6px;margin-bottom:14px}.tabs button{margin:0;padding:8px 14px;font-size:11px;border-color:var(--line);color:var(--mute)}.tabs button.on{border-color:var(--cyan);color:var(--cyan)}
+.err{color:var(--bad);font-size:13px;margin-top:10px;min-height:18px}.ok{color:#8fd694;font-size:13px}
+code{display:block;background:#0a0c12;border:1px solid var(--line);border-radius:10px;padding:10px;font:12px ui-monospace,Consolas,monospace;word-break:break-all;margin-top:8px;color:#cfe}
+.row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}.row small{color:var(--mute)}
+a.go{display:inline-block;margin-top:6px;color:var(--amber);text-decoration:none;font-size:13px;letter-spacing:.14em}
+</style></head><body><main>
+<h1>HEARTH <i>·</i></h1><p class="sub" id="sub">Your family's stories, kept safe.</p>
+
+<section id="out">
+  <div class="card demo"><h2>Just looking?</h2><p>Open a private sandbox with a pretend family, with no sign-up. It disappears after a day.</p><button class="primary" id="demo">TRY THE DEMO FAMILY</button></div>
+  <div class="card"><div class="tabs"><button class="on" data-t="login">SIGN IN</button><button data-t="signup">CREATE FAMILY</button><button data-t="join">JOIN WITH CODE</button></div>
+    <form id="f"><div id="fields"></div><button class="primary" id="go">CONTINUE</button><div class="err" id="err"></div></form></div>
+</section>
+
+<section id="in" hidden>
+  <div class="card"><h2 id="hname">Family</h2><div id="members"></div><a class="go" id="open" href="/">OPEN HEARTH →</a> &nbsp; <a class="go" href="/archive.html">FAMILY ARCHIVE →</a></div>
+  <div class="card" id="invcard"><h2>Invite a family member</h2><p style="color:var(--mute);font-size:14px">They create their own sign-in with a one-time code that lasts a week.</p><button id="inv">CREATE INVITE CODE</button><code id="code" hidden></code></div>
+  <div class="card" id="devcard"><h2>Hearth devices</h2><div id="devs"></div><label>Name</label><input id="dlabel" placeholder="Kitchen Hearth"><button id="adddev">ADD A DEVICE</button><code id="devtok" hidden></code></div>
+  <button class="ghost" id="logout">SIGN OUT</button>
+</section></main>
+<script>
+const $ = (id) => document.getElementById(id), next = new URLSearchParams(location.search).get("next") || "/";
+let tab = "login", token = localStorage.getItem("hl-token") || "";
+const FIELDS = { login: [["email", "Email", "email"], ["password", "Password", "password"]], signup: [["name", "Your name", "text"], ["householdName", "Family name (optional)", "text"], ["email", "Email", "email"], ["password", "Password (8+ characters)", "password"]], join: [["code", "Invite code", "text"], ["name", "Your name", "text"], ["email", "Email", "email"], ["password", "Password (8+ characters)", "password"]] };
+function draw() { $("fields").innerHTML = FIELDS[tab].map(([n, l, t]) => `<label>${l}</label><input name="${n}" type="${t}" ${t === "password" ? 'autocomplete="' + (tab === "login" ? "current-password" : "new-password") + '"' : ""} ${n === "householdName" ? "" : "required"}>`).join(""); document.querySelectorAll(".tabs button").forEach((b) => b.classList.toggle("on", b.dataset.t === tab)); $("err").textContent = ""; }
+document.querySelectorAll(".tabs button").forEach((b) => (b.onclick = () => { tab = b.dataset.t; draw(); }));
+const api = (url, body, tok) => fetch(url, { method: "POST", headers: { "content-type": "application/json", ...(tok ? { authorization: "Bearer " + tok } : {}) }, body: JSON.stringify(body || {}) }).then(async (r) => ({ ok: r.ok, j: await r.json().catch(() => ({})) }));
+function done(j) { token = j.token; localStorage.setItem("hl-token", token); location.href = next; }
+$("f").onsubmit = async (e) => {
+  e.preventDefault(); const body = Object.fromEntries(new FormData($("f")));
+  const { ok, j } = await api("/api/auth/" + tab, body);
+  ok ? done(j) : ($("err").textContent = j.error || "Something went wrong");
+};
+$("demo").onclick = async () => { const { ok, j } = await api("/api/auth/demo"); ok ? done(j) : ($("err").textContent = j.error || "Demo unavailable"); };
+async function show() {
+  const r = await fetch("/api/auth/me", { headers: { authorization: "Bearer " + token } });
+  if (!r.ok) { localStorage.removeItem("hl-token"); return; }
+  const me = await r.json(); $("out").hidden = true; $("in").hidden = false; $("open").href = next;
+  $("sub").textContent = me.user.role === "guest" ? "You're in a private demo sandbox." : `Signed in as ${me.user.name}`;
+  $("hname").textContent = me.household?.name || "Family";
+  $("members").innerHTML = (me.members.length ? me.members : [{ name: me.user.name, role: me.user.role }]).map((m) => `<div class="row"><span>${m.name}</span><small>${m.role}</small></div>`).join("");
+  const guest = me.user.role === "guest", owner = me.user.role === "owner";
+  $("invcard").hidden = guest; $("devcard").hidden = !owner;
+  if (owner) loadDevs();
+}
+async function loadDevs() { const j = await fetch("/api/devices", { headers: { authorization: "Bearer " + token } }).then((r) => r.json()); $("devs").innerHTML = j.devices.map((d) => `<div class="row"><span>${d.label}</span><small><a href="#" data-id="${d.id}" style="color:#ff8a8a">remove</a></small></div>`).join("") || '<p style="color:var(--mute);font-size:14px">No devices yet.</p>'; $("devs").querySelectorAll("a").forEach((a) => (a.onclick = async (e) => { e.preventDefault(); await fetch("/api/devices/" + a.dataset.id, { method: "DELETE", headers: { authorization: "Bearer " + token } }); loadDevs(); })); }
+$("inv").onclick = async () => { const { ok, j } = await api("/api/auth/invite", {}, token); $("code").hidden = false; $("code").textContent = ok ? `Invite code: ${j.code}   (share it; they choose "Join with code")` : j.error; };
+$("adddev").onclick = async () => { const { ok, j } = await api("/api/devices", { label: $("dlabel").value }, token); $("devtok").hidden = false; $("devtok").textContent = ok ? `Copy this now; it is shown once:\nHEARTH_SERVER=${location.origin} HEARTH_TOKEN=${j.token} python hearth_device.py` : j.error; if (ok) loadDevs(); };
+$("logout").onclick = () => { localStorage.removeItem("hl-token"); location.href = "/account.html"; };
+fetch("/api/config").then((r) => r.json()).then((c) => { if (!c.accounts) { $("sub").textContent = "Accounts are switched off on this server (local mode). Open Hearth directly."; $("out").hidden = true; $("in").hidden = true; $("sub").insertAdjacentHTML("afterend", '<p class="sub"><a class="go" href="/">OPEN HEARTH →</a></p>'); } else { draw(); if (token) show(); } });
+</script></body></html>

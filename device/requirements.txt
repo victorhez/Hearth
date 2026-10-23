@@ -1,0 +1,9 @@
+numpy
+requests
+sounddevice
+faster-whisper
+openwakeword
+gpiozero
+# optional LEDs:           adafruit-circuitpython-neopixel
+# optional offline voice:  piper-tts   (or: apt install espeak-ng)
+# audio playback:          apt install mpg123

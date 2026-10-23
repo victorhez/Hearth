@@ -1,0 +1,8 @@
+node_modules
+data
+test/tmpdata/
+.env
+.vscode/
+__pycache__
+video/out
+hearth-demo.mp4

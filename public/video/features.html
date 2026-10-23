@@ -1,0 +1,32 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hearth · feature cards</title>
+<link rel="stylesheet" href="video.css">
+<style>
+.card{position:fixed;inset:0;display:grid;place-items:center;text-align:center;opacity:0;transition:opacity .7s;pointer-events:none;padding:0 8vw}
+.card.on{opacity:1}
+.card svg{width:min(14vw,200px);height:auto;stroke:var(--c,var(--amber));fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 22px var(--c,var(--amber)));margin-bottom:3vh}
+.card h2{font-weight:200;font-size:min(6.2vw,104px);letter-spacing:.06em}
+.card p{margin-top:2vh;font-size:min(2.3vw,38px);font-weight:300;color:#cfc8bb;font-family:Georgia,serif;font-style:italic;max-width:1400px}
+.card.on h2{animation:rise .9s ease both}.card.on p{animation:rise .9s .25s ease both}.card.on svg{animation:rise .9s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+.langs{display:flex;gap:2vw;justify-content:center;margin-top:4vh;font-size:min(3vw,52px);font-weight:300}.langs span{opacity:0;animation:rise .6s ease forwards}
+.bar{position:fixed;left:0;bottom:0;height:3px;background:var(--amber);width:0}
+</style></head><body>
+<section class="card" style="--c:#f0b86a"><div><svg viewBox="0 0 64 64"><rect x="14" y="8" width="36" height="48" rx="12"/><ellipse cx="32" cy="14" rx="14" ry="4"/><path d="M20 38h24M20 44h24M20 50h24"/></svg><h2>On your counter</h2><p>The Hearth device: a Raspberry Pi that wakes to your voice, listens offline and never needs a phone.</p></div></section>
+<section class="card" style="--c:#52d6f5"><div><svg viewBox="0 0 64 64"><rect x="20" y="6" width="24" height="52" rx="5"/><path d="M28 12h8M30 52h4"/><circle cx="32" cy="32" r="7"/></svg><h2>Or in your pocket</h2><p>The stand-alone web app: any browser, any phone, no hardware at all.</p></div></section>
+<section class="card" style="--c:#8fd694"><div><svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="24"/><ellipse cx="32" cy="32" rx="10" ry="24"/><path d="M8 32h48M12 20h40M12 44h40"/></svg><h2>Speaks your language</h2><p>Listens and answers in seven languages. Just say it: “switch to French”.</p><div class="langs"><span style="animation-delay:.3s">English</span><span style="animation-delay:.45s">Español</span><span style="animation-delay:.6s">Français</span><span style="animation-delay:.75s">中文</span><span style="animation-delay:.9s">Português</span><span style="animation-delay:1.05s">Deutsch</span><span style="animation-delay:1.2s">हिन्दी</span></div></div></section>
+<section class="card" style="--c:#f58bb0"><div><svg viewBox="0 0 64 64"><path d="M32 54s-20-12-20-28a12 12 0 0 1 20-8 12 12 0 0 1 20 8c0 16-20 28-20 28z"/><path d="M22 28h8l3-6 4 12 3-6h6"/></svg><h2>Remembers for you</h2><p>People forget dates, names and places. Hearth keeps every story: who, where, when, and how it felt.</p></div></section>
+<section class="card" style="--c:#b99bff"><div><svg viewBox="0 0 64 64"><circle cx="22" cy="22" r="8"/><circle cx="44" cy="24" r="6"/><path d="M8 52c0-10 6-16 14-16s14 6 14 16M36 52c0-8 4-12 10-12s10 4 10 12"/></svg><h2>Family time</h2><p>Quizzes and games made from your own history, so the stories are used, not just stored.</p></div></section>
+<section class="card" style="--c:#f0b86a"><div><svg viewBox="0 0 64 64"><path d="M16 32c0-8 6-14 12-14 10 0 12 28 22 28 6 0 10-6 10-14S56 18 50 18c-10 0-12 28-22 28-6 0-12-6-12-14z" transform="translate(-4 0)"/></svg><h2>For generations</h2><p>Leave a message for children not yet born. They will be able to ask, and be answered.</p></div></section>
+<div class="bar" id="bar"></div><div class="hint">space = pause / next &nbsp; ← → = move &nbsp; ?rec=1 hides this hint &nbsp; ?sec=4 seconds per card</div>
+<script>
+const qs = new URLSearchParams(location.search), cards = [...document.querySelectorAll(".card")], dur = (+qs.get("sec") || 4) * 1000;
+if (qs.get("rec")) document.body.classList.add("rec");
+let i = -1, timer, paused = false;
+function show(n) {
+  i = (n + cards.length) % cards.length; cards.forEach((c, k) => c.classList.toggle("on", k === i));
+  const b = document.getElementById("bar"); b.style.transition = "none"; b.style.width = "0"; requestAnimationFrame(() => requestAnimationFrame(() => { b.style.transition = `width ${dur}ms linear`; b.style.width = "100%"; }));
+  clearTimeout(timer); if (!paused) timer = setTimeout(() => show(i + 1), dur);
+}
+addEventListener("keydown", (e) => { if (e.code === "Space") { paused = !paused; paused ? clearTimeout(timer) : show(i); } if (e.code === "ArrowRight") show(i + 1); if (e.code === "ArrowLeft") show(i - 1); });
+show(0);
+</script></body></html>

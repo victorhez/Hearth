@@ -1,0 +1,26 @@
+# One-click-ish hosting on Render's free tier (no credit card). See docs/DEPLOY.md.
+# Storage: a free Upstash Redis database (https://upstash.com) so data survives restarts.
+services:
+  - type: web
+    name: hearth-legacylink
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: LEGACYLINK_ACCOUNTS
+        value: "1"
+      - key: LEGACYLINK_SECRET
+        generateValue: true
+      - key: LEGACYLINK_TTS
+        value: edge
+      - key: LEGACYLINK_UPSTASH_URL
+        sync: false   # paste from the Upstash dashboard (REST URL)
+      - key: LEGACYLINK_UPSTASH_TOKEN
+        sync: false   # paste from the Upstash dashboard (REST token)
+      # Optional, only if you have AWS credits:
+      # - key: BEDROCK_MODEL_ID
+      # - key: AWS_REGION
+      # - key: AWS_ACCESS_KEY_ID
+      # - key: AWS_SECRET_ACCESS_KEY
