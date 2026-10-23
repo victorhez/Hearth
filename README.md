@@ -50,14 +50,14 @@ The project contains optional integrations for Amazon Bedrock (conversation and 
 
 I created an AWS account and added billing information, but the phone-verification code has not arrived despite repeated attempts over several days. I have contacted AWS Support and am waiting for a response. Without completing verification, I cannot obtain the credentials needed to validate the live integrations. This is a current blocker—not a claim that AWS deployment is complete.
 
-The application works locally without AWS credentials. Free hosting with Render and Upstash is a separate path and does not depend on AWS; see [the deployment guide](docs/DEPLOY.md).
+The application works locally without AWS credentials. Hosted Vercel deployments can use Upstash or a DynamoDB table; AWS cloud integrations remain optional for local use.
 
 ## Roadmap
 
 | Phase | Focus | Work |
 |---|---|---|
 | **Now — local prototype** | Core experience | Conversation, archive, quizzes, seven-language flows, accounts, MCP tools, and local testing. Continue fixing the device simulation test and keep results documented. |
-| **Next — public demo** | Shareable web experience | The repo is published and Vercel configuration is included. Connect the GitHub project, configure persistent Upstash storage and production secrets, deploy, then smoke-test the HTTPS demo from a clean browser before sharing a live test link. |
+| **Next — public demo** | Shareable web experience | The repo and Vercel project are published. Configure persistent storage and production secrets, deploy, then smoke-test the HTTPS demo from a clean browser before sharing the live test link. |
 | **Next — AWS validation** | Optional cloud integrations | After account verification, exercise Bedrock, Polly, and/or DynamoDB with least-privilege credentials, cost controls, and documented results. Only then claim live AWS service use or enter the AWS Builder Mini Challenge. |
 | **After the demo — device build** | Hardware readiness | Install on the target Raspberry Pi, validate microphone, speech recognition, speaker, wake phrase, LED feedback, reconnect/offline sync, and startup behavior; then create repeatable packaging and setup instructions. |
 | **Longer term — trust and reach** | Responsible expansion | Add encryption at rest, account verification and recovery, privacy controls for consent/export/deletion, real-family usability testing, and a supported Alexa+ integration/test path. |
@@ -99,11 +99,9 @@ The device suite needs Node.js, the project dependencies, and the Python package
 | Storage | Local JSON by default; optional Upstash Redis or DynamoDB adapters |
 | Device | Python runtime for wake phrase, offline speech recognition, voice profiles, LED state, and queued sync |
 
-Read the source guide in [docs/](docs/), including [AWS setup](docs/AWS_SETUP.md), [deployment](docs/DEPLOY.md), and the [submission copy guide](docs/SUBMISSION.md).
-
 ## Deployment status
 
-The repository is public and includes Vercel configuration, a Dockerfile, and a Render blueprint. These are deployment files, **not a deployed URL**. Vercel deployment requires persistent Upstash credentials, account mode, and a strong signing secret; see [the deployment guide](docs/DEPLOY.md). AWS is not required. Vercel does not support the app's current in-memory live device-screen event mirror, though the regular web app and conversation API are supported.
+The repository is public and includes Vercel configuration, a Dockerfile, and a Render blueprint. Configure persistent storage, account mode, and a strong signing secret in the host's environment settings. On Vercel, the live device-screen event mirror is unavailable because its subscriber fan-out is process-local, but the regular web app and conversation API are supported.
 
 The GitHub repository is available at [victorhez/Hearth](https://github.com/victorhez/Hearth). No deployed test URL is configured in this checkout; add one to the submission only after publishing and verifying it.
 

@@ -6,12 +6,19 @@ import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
+import { awsCredentialsProvider } from "@vercel/oidc-aws-credentials-provider";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 export const DATA_DIR = process.env.LEGACYLINK_DATA_DIR || path.join(here, "..", "data");
 const DIR = DATA_DIR;
 const safe = (h) => String(h || "home").replace(/[^a-z0-9_-]/gi, "").slice(0, 40) || "home";
 export const upstashConfigured = () => Boolean(process.env.LEGACYLINK_UPSTASH_URL && process.env.LEGACYLINK_UPSTASH_TOKEN);
+const dynamodbTable = () => process.env.LEGACYLINK_DDB_TABLE || process.env.DYNAMODB_TABLE_NAME;
+export const dynamodbConfigured = () => Boolean(dynamodbTable());
+const dynamodbKeys = () => ({
+  partition: process.env.DYNAMODB_TABLE_PARTITION_KEY || "household",
+  sort: process.env.DYNAMODB_TABLE_SORT_KEY || "id",
+});
 
 const fileStore = (household) => {
   const f = path.join(DIR, `${safe(household)}.json`);
@@ -35,20 +42,36 @@ const ddbStore = (household) => {
       if (!ddbDoc) {
         const { DynamoDBClient } = await import("@aws-sdk/client-dynamodb");
         const lib = await import("@aws-sdk/lib-dynamodb");
-        ddbDoc = { c: lib.DynamoDBDocumentClient.from(new DynamoDBClient({ region: process.env.AWS_REGION || "us-east-1" })), lib };
+        const credentials = process.env.VERCEL && process.env.AWS_ROLE_ARN
+          ? awsCredentialsProvider({ roleArn: process.env.AWS_ROLE_ARN })
+          : undefined;
+        ddbDoc = { c: lib.DynamoDBDocumentClient.from(new DynamoDBClient({ region: process.env.AWS_REGION || "us-east-1", credentials })), lib };
       }
       return ddbDoc;
     },
     async all() {
-      const { c, lib } = await this.client(); const out = []; let k;
+      const { c, lib } = await this.client(), keys = dynamodbKeys(), out = []; let k;
       do {
-        const r = await c.send(new lib.QueryCommand({ TableName: T, KeyConditionExpression: "household = :h", ExpressionAttributeValues: { ":h": pk }, ExclusiveStartKey: k }));
-        out.push(...r.Items); k = r.LastEvaluatedKey;
+        const r = await c.send(new lib.QueryCommand({ TableName: T, KeyConditionExpression: "#pk = :h", ExpressionAttributeNames: { "#pk": keys.partition }, ExpressionAttributeValues: { ":h": pk }, ExclusiveStartKey: k }));
+        out.push(...(r.Items || []).map((item) => ({
+          ...item,
+          id: item.id || item[keys.sort],
+          ...(keys.partition === "household" ? {} : { [keys.partition]: undefined }),
+          ...(keys.sort === "id" ? {} : { [keys.sort]: undefined }),
+        })));
+        k = r.LastEvaluatedKey;
       } while (k);
       return out.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
     },
-    async add(m) { const { c, lib } = await this.client(); await c.send(new lib.PutCommand({ TableName: T, Item: { household: pk, ...m } })); return m; },
-    async remove(id) { const { c, lib } = await this.client(); await c.send(new lib.DeleteCommand({ TableName: T, Key: { household: pk, id } })); },
+    async add(m) {
+      const { c, lib } = await this.client(), keys = dynamodbKeys();
+      await c.send(new lib.PutCommand({ TableName: T, Item: { household: pk, ...m, [keys.partition]: pk, [keys.sort]: m.id } }));
+      return m;
+    },
+    async remove(id) {
+      const { c, lib } = await this.client(), keys = dynamodbKeys();
+      await c.send(new lib.DeleteCommand({ TableName: T, Key: { [keys.partition]: pk, [keys.sort]: id } }));
+    },
     async clear() { for (const m of await this.all()) await this.remove(m.id); },
   };
 };
@@ -89,4 +112,4 @@ const upstashStore = (household) => {
   };
 };
 
-export const forHousehold = (household) => (process.env.LEGACYLINK_DDB_TABLE ? ddbStore(household) : upstashConfigured() ? upstashStore(household) : fileStore(household));
+export const forHousehold = (household) => (dynamodbConfigured() ? ddbStore(household) : upstashConfigured() ? upstashStore(household) : fileStore(household));

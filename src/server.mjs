@@ -11,7 +11,7 @@ import { buildServer } from "./tools.mjs";
 import { handle } from "./brain.mjs";
 import * as N from "./nlp.mjs";
 import * as AI from "./llm.mjs";
-import { forHousehold, upstashConfigured } from "./store.mjs";
+import { dynamodbConfigured, forHousehold, upstashConfigured } from "./store.mjs";
 import { seedHousehold } from "./seed.mjs";
 import { synthesize } from "./tts.mjs";
 import { S, UI, LANGS, CODES } from "./i18n.mjs";
@@ -28,7 +28,8 @@ export function createApp(app = express()) {
   app.use((_req, res, next) => {
     if (!process.env.VERCEL) return next();
     const missing = [];
-    if (!upstashConfigured()) missing.push("configure Upstash REST URL and token");
+    if (!upstashConfigured() && !dynamodbConfigured()) missing.push("configure persistent storage with Upstash or DynamoDB");
+    if (dynamodbConfigured() && !process.env.AWS_ROLE_ARN && !process.env.AWS_ACCESS_KEY_ID) missing.push("configure AWS_ROLE_ARN or AWS access credentials");
     if (!accountsOn()) missing.push("set LEGACYLINK_ACCOUNTS=1");
     if (!process.env.LEGACYLINK_SECRET) missing.push("set LEGACYLINK_SECRET");
     if (missing.length) return res.status(503).json({ error: "Vercel deployment is not configured", missing });
@@ -48,7 +49,7 @@ export function createApp(app = express()) {
   };
   mountAuth(app, express);
 
-  app.get("/health", (_q, r) => r.json({ ok: true, llm: AI.enabled() ? "bedrock" : "local", store: process.env.LEGACYLINK_DDB_TABLE ? "dynamodb" : upstashConfigured() ? "upstash" : "file", accounts: accountsOn() }));
+  app.get("/health", (_q, r) => r.json({ ok: true, llm: AI.enabled() ? "bedrock" : "local", store: dynamodbConfigured() ? "dynamodb" : upstashConfigured() ? "upstash" : "file", accounts: accountsOn() }));
 
   app.post("/mcp", auth, async (req, res) => {
     const server = buildServer(hh(req));
