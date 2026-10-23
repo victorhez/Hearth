@@ -33,7 +33,9 @@ Hearth is my attempt to make preserving those memories feel less like a task and
 
 ## Current stage and test evidence
 
-This is a working local prototype—not a finished, production-ready service. The browser discussion flow and speech experience have been exercised locally. The repository also contains a device runtime and offline queue, but final Raspberry Pi assembly, real microphone/speaker/LED validation, and packaging as a ready-to-install appliance remain future work.
+The browser app is now deployed on Vercel and connected to DynamoDB. The browser discussion flow and speech experience have been exercised locally, and a live demo-family conversation has been smoke-tested against the hosted archive. This remains a prototype, not a finished production service. Final Raspberry Pi assembly, real microphone/speaker/LED validation, and packaging as a ready-to-install appliance remain future work.
+
+**Live demo:** [hearth-gold-phi.vercel.app](https://hearth-gold-phi.vercel.app/)
 
 The latest verification in this workspace:
 
@@ -46,19 +48,17 @@ These results are automated local tests, not evidence of a live cloud deployment
 
 ## AWS status
 
-The project contains optional integrations for Amazon Bedrock (conversation and embeddings), Amazon Polly (speech), and DynamoDB (storage). The Bedrock agent loop has a mocked-client test, but these AWS services have **not** been run against a live AWS account for this submission.
+The live Vercel deployment uses **Amazon DynamoDB** for family archive, account, and conversation data. The project is configured with the Vercel AWS integration and OIDC role credentials; the hosted demo successfully created a sandbox with 13 seeded stories and retrieved a story through the MCP conversation flow. The configured table is `aws-dynamodb-sky-nest`.
 
-I created an AWS account and added billing information, but the phone-verification code has not arrived despite repeated attempts over several days. I have contacted AWS Support and am waiting for a response. Without completing verification, I cannot obtain the credentials needed to validate the live integrations. This is a current blocker—not a claim that AWS deployment is complete.
-
-The application works locally without AWS credentials. Hosted Vercel deployments can use Upstash or a DynamoDB table; AWS cloud integrations remain optional for local use.
+Amazon Bedrock and Amazon Polly remain optional integrations in the source and have **not** been validated live. The original AWS phone-verification problem blocked manual AWS credential setup; DynamoDB access for this deployment was subsequently configured through Vercel's AWS integration. Local development still works without AWS.
 
 ## Roadmap
 
 | Phase | Focus | Work |
 |---|---|---|
-| **Now — local prototype** | Core experience | Conversation, archive, quizzes, seven-language flows, accounts, MCP tools, and local testing. Continue fixing the device simulation test and keep results documented. |
-| **Next — public demo** | Shareable web experience | The repo and Vercel project are published. Configure persistent storage and production secrets, deploy, then smoke-test the HTTPS demo from a clean browser before sharing the live test link. |
-| **Next — AWS validation** | Optional cloud integrations | After account verification, exercise Bedrock, Polly, and/or DynamoDB with least-privilege credentials, cost controls, and documented results. Only then claim live AWS service use or enter the AWS Builder Mini Challenge. |
+| **Complete — local prototype** | Core experience | Conversation, archive, quizzes, seven-language flows, accounts, MCP tools, and local testing are implemented. Continue fixing the device simulation test and keep results documented. |
+| **Current — public demo** | Shareable web experience | The Vercel deployment is live with DynamoDB-backed storage. Continue checking the public HTTPS demo and keep judge instructions current. |
+| **Next — AWS validation** | Optional cloud integrations | DynamoDB is live and verified through Vercel OIDC. If AWS account access is resolved, test Bedrock and Polly with least-privilege permissions and cost controls before claiming those integrations. |
 | **After the demo — device build** | Hardware readiness | Install on the target Raspberry Pi, validate microphone, speech recognition, speaker, wake phrase, LED feedback, reconnect/offline sync, and startup behavior; then create repeatable packaging and setup instructions. |
 | **Longer term — trust and reach** | Responsible expansion | Add encryption at rest, account verification and recovery, privacy controls for consent/export/deletion, real-family usability testing, and a supported Alexa+ integration/test path. |
 
@@ -101,9 +101,9 @@ The device suite needs Node.js, the project dependencies, and the Python package
 
 ## Deployment status
 
-The repository is public and includes Vercel configuration, a Dockerfile, and a Render blueprint. Configure persistent storage, account mode, and a strong signing secret in the host's environment settings. On Vercel, the live device-screen event mirror is unavailable because its subscriber fan-out is process-local, but the regular web app and conversation API are supported.
+The repository is public and includes Vercel configuration, a Dockerfile, and a Render blueprint. The production app is live at [hearth-gold-phi.vercel.app](https://hearth-gold-phi.vercel.app/) with DynamoDB storage. On Vercel, the live device-screen event mirror is unavailable because its subscriber fan-out is process-local, but the regular web app and conversation API are supported.
 
-The GitHub repository is available at [victorhez/Hearth](https://github.com/victorhez/Hearth). No deployed test URL is configured in this checkout; add one to the submission only after publishing and verifying it.
+The GitHub repository is available at [victorhez/Hearth](https://github.com/victorhez/Hearth). Use the live demo link above as the submission testing URL.
 
 ## Privacy and limitations
 
